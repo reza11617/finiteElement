@@ -1,0 +1,4 @@
+110 -> everything is working however assembling is so slow and need to be changed
+111 -> assemble is slow, now each core calculates stiffness matrix of an element
+112 -> assemble works fine fixed dofs has not beed removed yet
+113 -> assemble works fine it will zero all the entries in stiffness matrix related to fixed dofs

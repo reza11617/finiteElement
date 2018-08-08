@@ -1,0 +1,3 @@
+def start(simNumber):
+    fileName = '../src/Cinput/sim'+ str(simNumber)+'.dat'
+    return open(fileName,'w')

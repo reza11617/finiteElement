@@ -1,0 +1,2 @@
+from finite import *
+start(1)

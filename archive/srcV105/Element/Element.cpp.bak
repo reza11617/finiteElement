@@ -1,0 +1,194 @@
+#include "Element.h"
+
+Element::Element(Log &l,Material& mat, Geometry &geo, unsigned int n)
+  : log(&l), material(&mat), geometry(&geo), numberOfIntegrationPoint(n)
+{
+  //initialize
+  listInitializer();
+  n2IP = (numberOfIntegrationPoint)*(numberOfIntegrationPoint);
+  numberOfElements = (geometry->mesh.size());
+  // resize
+  int size = 36*(numberOfElements); // size of the stiffness matrix
+  DOF_1.resize(size);
+  DOF_2.resize(size);
+  stiffnessMatrix.resize(n2IP);
+  //fuctions
+  constantCreator();
+  integrationPoint();
+  DOF_Creator();
+  for (unsigned int i = 0; i < n2IP; i++)
+    {
+      //stiffnessMatrixCreator(i);
+    }
+  std::thread t[16];
+  for (unsigned int i = 0; i < 16; i++)
+     t[i] = std::thread(&Element::stiffnessMatrixCreator,this,i);
+  for (unsigned int i = 0; i < 16; i++)
+    t[i].join();
+  double sum = 0.00;
+  for (unsigned int i = 0; i < 16; i++)
+    sum+=stiffnessMatrix[i][0];
+  log->Info(sum);
+
+};
+
+void Element::stiffnessMatrixCreator(unsigned int j)
+{
+  stiffnessMatrix[j].resize(numberOfElements*36);
+  for (unsigned int i = 0; i < numberOfElements; i++)
+    {
+      stiffnessMatrixFirtOrder(stiffnessMatrix,i,j);
+    }
+};
+
+void Element::stiffnessMatrixFirtOrder(std::vector<std::vector<double>>& stiffMat, unsigned int noe,unsigned int noIP)
+{
+  double XI = integrationNode[noIP*2]; double YI = integrationNode[noIP*2+1];
+  // Jacobian
+  double J11 = c[noe][0]*YI-c[noe][1]; double J12 = c[noe][3]*YI-c[noe][4]; double J21 = c[noe][0]*XI-c[noe][2]; double J22 = c[noe][3]*XI-c[noe][5];
+  double detJ = J11*J22-J12*J21;
+  // derveativs of the shape function
+  double N1x = J22*( YI-1)/4 -  J12*( XI-1)/4;
+  double N1y = J11*( XI-1)/4 -  J21*( YI-1)/4;
+  double N2x = J22*(-YI+1)/4 -  J12*(-XI-1)/4;
+  double N2y = J11*(-XI-1)/4 -  J21*(-YI+1)/4;
+  double N3x = J22*( YI+1)/4 -  J12*( XI+1)/4;
+  double N3y = J11*( XI+1)/4 -  J21*( YI+1)/4;
+  double N4x = J22*(-YI-1)/4 -  J12*(-XI+1)/4;
+  double N4y = J11*(-XI+1)/4 -  J21*(-YI-1)/4;
+  // B matrix
+  cs *B, *BT;
+  BT = cs_spalloc (8, 3, 1, 1, 1);
+  cs_entry (BT,0,0,N1x); cs_entry (BT,0,2,N1y); cs_entry (BT,1,1,N1y); cs_entry (BT,1,2,N1x);
+  cs_entry (BT,2,0,N2x); cs_entry (BT,2,2,N2y); cs_entry (BT,3,1,N2y); cs_entry (BT,3,2,N2x);
+  cs_entry (BT,4,0,N3x); cs_entry (BT,4,2,N3y); cs_entry (BT,5,1,N3y); cs_entry (BT,5,2,N3x);
+  cs_entry (BT,6,0,N4x); cs_entry (BT,6,2,N4y); cs_entry (BT,7,1,N4y); cs_entry (BT,7,2,N4x);
+  BT = cs_compress (BT);
+  cs_dropzeros(BT);
+  B = cs_transpose(BT,1);
+  //cs_print(B,0);
+  // D matrix
+  cs *D;
+  D = cs_spalloc (3, 3, 1, 1, 1);
+  cs_entry(D,0,0,material->materialMatrix[0]);//D11
+  cs_entry(D,0,1,material->materialMatrix[3]);//D12
+  cs_entry(D,0,2,material->materialMatrix[4]);//D13
+  cs_entry(D,1,0,material->materialMatrix[3]);//D21
+  cs_entry(D,1,1,material->materialMatrix[1]);//D22
+  cs_entry(D,1,2,material->materialMatrix[5]);//D23
+  cs_entry(D,2,0,material->materialMatrix[4]);//D31
+  cs_entry(D,2,1,material->materialMatrix[5]);//D32
+  cs_entry(D,2,2,material->materialMatrix[2]);//D33
+  D = cs_compress (D) ;
+  cs_dropzeros(D);
+  // stiffness matrix (B^T*D*B)
+  cs *k;
+  k = cs_multiply(cs_multiply(BT,D),B);
+  double multiplier = integrationWeight[noIP]/detJ;
+  for (unsigned int i=0; i<64;i++)
+    k->x[i] = k->x[i]*multiplier;
+  unsigned int *listIndexPointer = listIndex;
+  for (unsigned int i = 0; i<36; i++)
+    stiffMat[noIP][noe*36+i] = k->x[*(listIndexPointer++)];
+  cs_spfree(k);
+  cs_spfree(B);
+  cs_spfree(BT);
+  cs_spfree(D);
+};
+
+void Element::constantCreator()
+{
+  c.resize(numberOfElements);
+  for (unsigned int noe = 0; noe < numberOfElements; noe++)
+    {
+      c[noe] = {(geometry->x[geometry->mesh[noe][0]] - geometry->x[geometry->mesh[noe][1]] + geometry->x[geometry->mesh[noe][2]] - geometry->x[geometry->mesh[noe][3]])/4, \
+		(geometry->x[geometry->mesh[noe][0]] - geometry->x[geometry->mesh[noe][1]] - geometry->x[geometry->mesh[noe][2]] + geometry->x[geometry->mesh[noe][3]])/4, \
+		(geometry->x[geometry->mesh[noe][0]] - geometry->x[geometry->mesh[noe][3]] - geometry->x[geometry->mesh[noe][2]] + geometry->x[geometry->mesh[noe][1]])/4, \
+		(geometry->y[geometry->mesh[noe][0]] - geometry->y[geometry->mesh[noe][1]] + geometry->y[geometry->mesh[noe][2]] - geometry->y[geometry->mesh[noe][3]])/4, \
+		(geometry->y[geometry->mesh[noe][0]] - geometry->y[geometry->mesh[noe][1]] - geometry->y[geometry->mesh[noe][2]] + geometry->y[geometry->mesh[noe][3]])/4, \
+		(geometry->y[geometry->mesh[noe][0]] - geometry->y[geometry->mesh[noe][3]] - geometry->y[geometry->mesh[noe][2]] + geometry->y[geometry->mesh[noe][1]])/4};// defined the constants c1x to c3y
+    }
+};
+
+
+void Element::DOF_Creator()
+{
+  unsigned int counter = 0;
+  unsigned int xi, xj, yi, yj;
+  for (unsigned int k = 0; k < numberOfElements; k++)
+    {
+      for (unsigned int i = 0; i<8; i++)
+	{
+	  for (unsigned int j = 0; j<i+1; j++)
+	    {
+	      xi = i/2; yi = i%2-1; xj = j/2; yj = j%2-1;
+	      DOF_1[counter] = (geometry->mesh[k][xi]+1)*2+yi;
+	      DOF_2[counter++] = (geometry->mesh[k][xj]+1)*2+yj;
+	    }
+	}  
+    }
+};
+    
+void Element::integrationPoint()
+{
+  n2IP = numberOfIntegrationPoint*numberOfIntegrationPoint; 
+  integrationNode.reserve(n2IP*4);
+  integrationWeight.reserve(n2IP);
+
+  if (numberOfIntegrationPoint == 1) {
+    integrationNode = {0,0};
+    integrationWeight = {4};
+  } else if (numberOfIntegrationPoint == 2) {
+    integrationNode = {-0.57735, -0.57735, -0.57735, 0.57735,\
+		        0.57735, -0.57735,  0.57735, 0.57735};
+    integrationWeight = {1.0,1.0,1.0,1.0};
+  } else if (numberOfIntegrationPoint == 3) {
+    double ip = 0.774596; //sqrt(3/5)
+    integrationNode = {-1*ip,-1*ip,0,-1*ip,ip,-1*ip,-1*ip,0,0,0,ip,0,-1*ip,ip,0,ip,ip,ip};
+    double x = 25./81.;
+    double y = 64./81.;
+    double z = 40./81.;
+    integrationWeight = {x,z,x,z,y,z,x,z,x};
+  } else if (numberOfIntegrationPoint == 4) {
+    double ip1 = 0.861136;
+    double ip2 = 0.339981;
+    integrationNode = {-ip1, -ip1, -ip1, -ip2, -ip1, ip2, -ip1, ip1,\
+		       -ip2, -ip1, -ip2, -ip2, -ip2, ip2, -ip2, ip1,\
+		       +ip2, -ip1,  ip2, -ip2,  ip2, ip2,  ip2, ip1,\
+		       +ip1, -ip1,  ip1, -ip2,  ip1, ip2,  ip1, ip1};
+    double w1 = 0.347855*0.347855;
+    double w2 = 0.652145*0.652145;
+    double w3 = 0.652145*0.347855;
+    integrationWeight = {w1, w3, w3, w1, w3, w2, w2, w3, w3, w2, w2, w3, w1, w3, w3, w1};
+  } else if (numberOfIntegrationPoint == 5) {
+    double ip1 = 0.90618;
+    double ip2 = 0.538469;
+    integrationWeight = {-ip1, -ip1, -ip1, -ip2, -ip1, 0, -ip1, ip2, -ip1, ip1,\
+	       -ip2, -ip1, -ip2, -ip2, -ip2, 0, -ip2, ip2, -ip2, ip1,\
+	       0,    -ip1,    0, -ip2,    0, 0,    0, ip2,    0, ip1,\
+	       +ip2, -ip1,  ip2, -ip2,  ip2, 0,  ip2, ip2,  ip2, ip1,\
+	       +ip1, -ip1,  ip1, -ip2,  ip1, 0,  ip1, ip2,  ip1, ip1};
+    double w1 = 0.236927;
+    double w2 = 0.478629;
+    double w3 = 0.568889;
+    integrationWeight = {w1*w1, w1*w2, w1*w3, w1*w2, w1*w1, w2*w1, w2*w2, w2*w3, w2*w2, w2*w1,\
+			 w3*w1, w3*w2, w3*w3, w3*w2, w3*w1, w2*w1, w2*w2, w2*w3, w2*w2, w2*w1, \
+			 w1*w1, w1*w2, w1*w3, w1*w2, w1*w1};
+  } else {
+    log->Error("Integration points more than five is under construction");
+  }
+};
+
+
+void Element::listInitializer()
+{
+  unsigned int i =  0; 
+  listIndex[i++] =  0;
+  listIndex[i++] =  8; listIndex[i++] = 12;
+  listIndex[i++] = 16; listIndex[i++] = 20; listIndex[i++] = 17;
+  listIndex[i++] = 24; listIndex[i++] = 28; listIndex[i++] = 25; listIndex[i++] = 29;
+  listIndex[i++] = 32; listIndex[i++] = 36; listIndex[i++] = 33; listIndex[i++] = 37; listIndex[i++] = 34; 
+  listIndex[i++] = 40; listIndex[i++] = 44; listIndex[i++] = 41; listIndex[i++] = 45; listIndex[i++] = 42; listIndex[i++] = 46;
+  listIndex[i++] = 48; listIndex[i++] = 52; listIndex[i++] = 49; listIndex[i++] = 53; listIndex[i++] = 50; listIndex[i++] = 54; listIndex[i++] = 51;
+  listIndex[i++] = 56; listIndex[i++] = 60; listIndex[i++] = 57; listIndex[i++] = 61; listIndex[i++] = 58; listIndex[i++] = 62; listIndex[i++] = 59; listIndex[i++] = 63;
+};
