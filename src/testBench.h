@@ -14,6 +14,9 @@
 #include "StiffnessMatrix/StiffnessMatrixSingleCPU/StiffnessMatrixSingleCPU.h"
 #include "StiffnessMatrix/StiffnessMatrixGPU/StiffnessMatrixGPU.h"
 #include "Recorder/Recorder.h"
+#include "SolverSp/SolverSp.h"
+
+
 int main();
 Geometry& geometry();
 float maxError(StiffnessMatrix& , StiffnessMatrix&);

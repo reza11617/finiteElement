@@ -9,7 +9,7 @@
 
 //#include <cuda_runtime_api.h>
 //#include <cuda.h>
-#include  <cusolverDn.h>
+//#include  <cusolverDn.h>
 
 struct sort_indices {
 private:
@@ -51,7 +51,7 @@ public:
   Sparse(unsigned int, unsigned int);
   Sparse();
   ~Sparse();
-  void Assemble();
+  void Assemble(float);
   void set_numberOfRows(unsigned int);
   void set_numberOfColumns(unsigned int);
   void set_valueSize(unsigned int);
@@ -73,7 +73,6 @@ private:
 public:
   static unsigned int Printer(Sparse & s);
   static float Compare(Sparse& , Sparse&);
-  static  void solver(Sparse& , Sparse&);
 };
 
 std::ostream& operator<< (std::ostream &, Sparse const& );

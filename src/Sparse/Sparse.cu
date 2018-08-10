@@ -31,7 +31,7 @@ Sparse::~Sparse() {
 }
 
 // This function return a CSC matrix
-void Sparse::Assemble()
+void Sparse::Assemble(float tol)
 // coo -> a triplet sparse format
 {
   type = 1; // type is CSC
@@ -41,6 +41,7 @@ void Sparse::Assemble()
   for ( unsigned int c = 0; c < valueSize; c++) { indices[c] = c;};
   // timer
   Timer timer("Time spend in assembley: ");
+  //Log::Logger().Info(nnz_inRow,numberOfRows+1);
   // sorting i
   std::sort(indices,indices+valueSize, sort_indices(i));
   // sorting j 
@@ -53,21 +54,18 @@ void Sparse::Assemble()
     // -- remove the zero entries (counting the number of nnz in each row)
     a_temp_i[c] = nnz_inRow[c];
     for (unsigned int count = a; count < b; count++) 
-      if (abs(value[indices[count]]) < 0.001) {a_temp_i[c]--;}
+      if (abs(value[indices[count]]) < tol) {a_temp_i[c]--;}
     a_temp_i[c] += a_temp_i[c-1];
     //
     a = b;
   }
-
-  Log::Logger().Info(a_temp_i,numberOfRows+1); 
   
   // copy to new array
-
   cudaMallocManaged(&a_temp_j, (a_temp_i[numberOfRows])*sizeof(unsigned int)); 
   cudaMallocManaged(&a_temp_value, (a_temp_i[numberOfRows])*sizeof(float));
   unsigned int vs = 0; // new value size
   for (unsigned int c = 0; c < valueSize; c++) {
-    if (abs(value[indices[c]]) > 0.001) {
+    if (abs(value[indices[c]]) > tol) {
       a_temp_j[vs] = j[indices[c]] - 1;
       a_temp_value[vs] = value[indices[c]];
       vs++;
@@ -79,15 +77,8 @@ void Sparse::Assemble()
   j = a_temp_j;
   value = a_temp_value;
   
-  //
   delete[] indices;
 }
-  /*  
-  // just change the variable for test
-  unsigned int tempValueSize = valueSize; 
-  //valueSize = rowPtr[numberOfRows];
-  cudaDeviceSynchronize;
-  */
 
 float Sparse::Compare(Sparse& A, Sparse& B)
 // return the max Error between the two matrices
@@ -98,33 +89,6 @@ float Sparse::Compare(Sparse& A, Sparse& B)
   return MaxError;
 }
 
-void Sparse::solver(Sparse& matrix, Sparse& vector) {
-  Timer timer("Time spend in GPU for inverting: ");
-  cudaError cudaStatus;
-  cusolverStatus_t  cusolverStatus;
-  cusolverDnHandle_t  handle;
-  float   *Work;                                         //   workspace
-  int   *info , Lwork;                      //   info , workspace  size
-  cudaStatus = cudaGetDevice (0);
-  cusolverStatus = cusolverDnCreate (& handle ); //  create  handle
-  cublasFillMode_t  uplo = CUBLAS_FILL_MODE_LOWER;
-  cudaMallocManaged (&info ,sizeof(int ));// unified  mem. for  info
-  //  compute  workspace  size  and  prepare  workspace
-  cusolverStatus = cusolverDnSpotrf_bufferSize(handle , uplo ,matrix.numberOfRows,matrix.value,matrix.numberOfRows,& Lwork );
-  cudaMallocManaged (&Work ,Lwork*sizeof(float )); //mem.for  Work
-  //  Cholesky  decomposition   d_A=L*L^T, lower  triangle  of d_A is
-  //  replaced  by the  factor L
-  cusolverStatus = cusolverDnSpotrf(handle,uplo,matrix.numberOfRows,matrix.value,matrix.numberOfRows,Work,Lwork,info);
-  cudaStatus = cudaDeviceSynchronize ();
-  //  solve A*X=B,   where A is  factorized  by  potrf  function
-  // B is  overwritten  by the  solution
-  cusolverStatus = cusolverDnSpotrs(handle,uplo,matrix.numberOfRows,1,matrix.value,matrix.numberOfRows,vector.value,matrix.numberOfRows,info);
-  cudaStatus = cudaDeviceSynchronize ();
-  cudaStatus = cudaFree(info);
-  cudaStatus = cudaFree(Work);
-  cusolverStatus = cusolverDnDestroy(handle);
-  //cudaStatus = cudaDeviceReset();
-}
 
 // Setters
 void Sparse::set_i(unsigned int* index_i) { i = index_i;}
@@ -201,6 +165,7 @@ sort_indices_j::sort_indices_j(unsigned int* var, float* value)
 bool sort_indices_j::operator()(unsigned int i, unsigned int j) {
   if (dofSorted[i] == dofSorted[j]) {
     x[i] = x[i] + x[j]; x[j] = 0;
+   
     return true;
   } else {return dofSorted[i] < dofSorted[j];}
 };
