@@ -10,7 +10,7 @@ class Recorder {
 
 
 public:
-  const void matrix(const std::string& , float* , unsigned int) const;
+  const void matrix(const std::string& , double* , unsigned int) const;
   const void SparseMatrix(const std::string& fileName , const Sparse& sp) const;
   static Recorder& File();
   

@@ -1,6 +1,6 @@
 #include "SolverSp.h"
 
-SolverSp::SolverSp(float* A, unsigned int* rp, unsigned int* ci, unsigned int nz, unsigned int n, float* F, float* x)
+SolverSp::SolverSp(double* A, unsigned int* rp, unsigned int* ci, unsigned int nz, unsigned int n, double* F, double* x)
   : sparseMatrix(A), rowPtr((int*) rp), colIndices((int*) ci), nnz((int) nz), N((int)n), rightHandSideVector(F), leftHandSideVector(x)
 {
   Timer timer("time spend in the solver is: ");
@@ -16,7 +16,7 @@ SolverSp::~SolverSp() {
 }
 
 
-int SolverSp::SolverSpChol(float* sp, int*rp, int*ci) {
+int SolverSp::SolverSpChol(double* sp, int*rp, int*ci) {
   // --- Start the cuda sparse
   cusparseHandle_t handle; cusparseCreate(&handle);
   // --- Descriptor for sparse matrix A
@@ -28,14 +28,14 @@ int SolverSp::SolverSpChol(float* sp, int*rp, int*ci) {
   cusolverSpCreate(&solver_handle);
   //
   int singularity;
-  cusolverSpScsrlsvcholHost(solver_handle, N, nnz, descrA,
+  cusolverSpDcsrlsvcholHost(solver_handle, N, nnz, descrA,
   			    sp, rp, ci,
   			    rightHandSideVector, tolerance, reorder,
   			    leftHandSideVector, &singularity);
   return singularity;
 }
 
-void SolverSp::SolverSpQR(float* sp, int*rp, int*ci) {
+void SolverSp::SolverSpQR(double* sp, int*rp, int*ci) {
   cusparseHandle_t handle_n; cusparseCreate(&handle_n);
   // --- Descriptor for sparse matrix A
   cusparseMatDescr_t descrA_n;      (cusparseCreateMatDescr(&descrA_n));
@@ -48,8 +48,8 @@ void SolverSp::SolverSpQR(float* sp, int*rp, int*ci) {
   int rankA;
   int *p = new int[N];
   
-  float min_norm;
-  cusolverSpScsrlsqvqrHost(solver_handle_n, N, N, nnz, descrA_n,
+  double min_norm;
+  cusolverSpDcsrlsqvqrHost(solver_handle_n, N, N, nnz, descrA_n,
   			   sp, rp, ci, rightHandSideVector,
   			   tolerance, &rankA, leftHandSideVector, p, &min_norm);
   delete[] p;
@@ -67,8 +67,8 @@ void SolverSp::fixMatrices() {
   }
   nnz = rowPtr_n[N];
   // -- alocate new matrix variables
-  float* A_n; int* colIndices_n;
-  cudaMallocManaged(&A_n, nnz*sizeof(float));
+  double* A_n; int* colIndices_n;
+  cudaMallocManaged(&A_n, nnz*sizeof(double));
   cudaMallocManaged(&colIndices_n, nnz*sizeof(int));
   // -- fix the new matrix
   int counter = 0;

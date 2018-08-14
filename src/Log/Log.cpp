@@ -47,17 +47,6 @@ void Log::Info(const unsigned int *array, unsigned int printSize)
       
 }
 
-void Log::Info(const float *array, unsigned int printSize)
-{
-  if (m_LogLevel >= LevelInfo)
-    {
-      std::cout << "\033[1;34m[Array]: \033[0m" << std::endl;
-      for (unsigned int i = 0; i < printSize; i++)
-        std::cout << "a[" << i << "]= " << array[i] << std::endl;
-    }
-
-}
-
 void Log::Info(const double *array, unsigned int printSize)
 {
   if (m_LogLevel >= LevelInfo)
@@ -68,3 +57,15 @@ void Log::Info(const double *array, unsigned int printSize)
     }
 
 }
+/*
+void Log::Info(const double *array, unsigned int printSize)
+{
+  if (m_LogLevel >= LevelInfo)
+    {
+      std::cout << "\033[1;34m[Array]: \033[0m" << std::endl;
+      for (unsigned int i = 0; i < printSize; i++)
+        std::cout << "a[" << i << "]= " << array[i] << std::endl;
+    }
+
+}
+*/

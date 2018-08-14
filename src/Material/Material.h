@@ -6,11 +6,11 @@
 
 class Material {
 private:
-  float ElasticModulus;
-  float poissonRatio;
+  double ElasticModulus;
+  double poissonRatio;
 public:
-  float *materialMatrix;
-  Material(float, float);
+  double *materialMatrix;
+  Material(double, double);
   ~Material();
   void elasticMaterial();
 };

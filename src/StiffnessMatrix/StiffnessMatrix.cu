@@ -7,9 +7,9 @@ StiffnessMatrix::StiffnessMatrix(Material& mat, Geometry& geo, unsigned int n)
   nipSquared = numberOfIntegrationPoint*numberOfIntegrationPoint;
   simulationSize = numberOfElements*nipSquared;
   // integration points
-  cudaMallocManaged(&integrationNode, numberOfIntegrationPoint*sizeof(float));
+  cudaMallocManaged(&integrationNode, numberOfIntegrationPoint*sizeof(double));
   cudaMallocManaged(&integrationPos, numberOfIntegrationPoint*dimention*numberOfIntegrationPoint*sizeof(unsigned int));
-  cudaMallocManaged(&integrationWeight, numberOfIntegrationPoint*sizeof(float));
+  cudaMallocManaged(&integrationWeight, numberOfIntegrationPoint*sizeof(double));
   integrationPoint();
   Log::Logger().Info("StiffnessMatrix Created by CPU");
 };

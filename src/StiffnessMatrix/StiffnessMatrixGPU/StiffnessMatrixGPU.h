@@ -13,7 +13,7 @@ class StiffnessMatrixGPU : public StiffnessMatrixFirstOrder
 {
   // variables
 public:
-  float* D_d; // required arrays to copy to GPU
+  double* D_d; // required arrays to copy to GPU
 private:
   unsigned int blockSize;
   // methods

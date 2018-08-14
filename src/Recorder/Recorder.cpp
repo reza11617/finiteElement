@@ -1,6 +1,6 @@
 #include "Recorder.h"
 
-const void Recorder::matrix(const std::string& fileName , float* ptrArray, unsigned int sizeArray) const {
+const void Recorder::matrix(const std::string& fileName , double* ptrArray, unsigned int sizeArray) const {
   std::ofstream outfile;
   std::string fileName2 = std::string("output/") + fileName;
   outfile.open(fileName2);//, iso::out | iso::trunc);

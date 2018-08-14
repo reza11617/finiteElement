@@ -16,7 +16,7 @@ class Sparse
 {
   //variables
 public:
-  float* value;
+  double* value;
   unsigned int* i;
   unsigned int* j;
   unsigned int valueSize; //how many nonzeros
@@ -35,17 +35,17 @@ public:
   Sparse(unsigned int, unsigned int);
   Sparse();
   ~Sparse();
-  void Assemble(float);
+  void Assemble(double);
   void set_numberOfRows(unsigned int);
   void set_numberOfColumns(unsigned int);
   void set_valueSize(unsigned int);
   void set_i(unsigned int*);
   void set_j(unsigned int*);
-  void set_x(float*);
+  void set_x(double*);
   unsigned int get_valueSize() const;
   unsigned int get_numberOfRows() const;
   unsigned int get_numberOfColumns() const;
-  float * get_value() const;
+  double * get_value() const;
   unsigned int * get_i() const;
   unsigned int * get_j() const;
   unsigned int get_type() const;
@@ -56,7 +56,7 @@ private:
   // staic methods
 public:
   static unsigned int Printer(Sparse & s);
-  static float Compare(Sparse& , Sparse&);
+  static double Compare(Sparse& , Sparse&);
 };
 
 std::ostream& operator<< (std::ostream &, Sparse const& );
@@ -73,7 +73,7 @@ public:
 
 struct sort_indices_j {
 private:
-  float* x; // holds values of stiffness matrix
+  double* x; // holds values of stiffness matrix
   unsigned int* dofSorted; // the variable that index is going to sorted base of
 public:
   sort_indices_j(Sparse*); 

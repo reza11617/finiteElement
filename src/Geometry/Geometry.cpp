@@ -18,7 +18,7 @@ Geometry::~Geometry() {
   delete dof;
 };
 
-void Geometry::node(float tempX, float tempY) {
+void Geometry::node(double tempX, double tempY) {
   xDim.push_back(tempX);
   yDim.push_back(tempY);
 };
@@ -40,10 +40,10 @@ void Geometry::modelBuild() {
   numberOfNodes = xDim.size();
   x = &xDim[0]; // return them as array
   y = &yDim[0];
-  cudaMallocManaged(&x_d, numberOfNodes*sizeof(float));
-  cudaMemcpy(x_d, x, numberOfNodes*sizeof(float), cudaMemcpyHostToDevice);
-  cudaMallocManaged(&y_d, numberOfNodes*sizeof(float));
-  cudaMemcpy(y_d, y, numberOfNodes*sizeof(float), cudaMemcpyHostToDevice);
+  cudaMallocManaged(&x_d, numberOfNodes*sizeof(double));
+  cudaMemcpy(x_d, x, numberOfNodes*sizeof(double), cudaMemcpyHostToDevice);
+  cudaMallocManaged(&y_d, numberOfNodes*sizeof(double));
+  cudaMemcpy(y_d, y, numberOfNodes*sizeof(double), cudaMemcpyHostToDevice);
   // Dof
   dof->build(numberOfNodes);
   // building the load vector
@@ -52,8 +52,8 @@ void Geometry::modelBuild() {
 }
 
 
-float* Geometry::get_x() { return x_d;}
-float* Geometry::get_y() { return y_d;}
+double* Geometry::get_x() { return x_d;}
+double* Geometry::get_y() { return y_d;}
 unsigned int* Geometry::get_mesh() { return mesh_d;}
 unsigned int Geometry::get_numberOfElementsG() {return numberOfElementsG;}
 unsigned int Geometry::get_x_y_size() {return numberOfNodes;}
@@ -67,21 +67,21 @@ Load::Load() {
 Load::~Load() {
   cudaFree(loadVec);
 }
-void Load::point(int NodeNumber, float loadValue_x, float loadValue_y) {
+void Load::point(int NodeNumber, double loadValue_x, double loadValue_y) {
   LoadVector_dof_i.push_back(NodeNumber*2-1);
   LoadVector_value.push_back(loadValue_x);
   LoadVector_dof_i.push_back(NodeNumber*2);
   LoadVector_value.push_back(loadValue_y); 
 }
 void Load::build(unsigned int* dofFree, unsigned int freeSize) {
-  cudaMallocManaged(&loadVec, freeSize*sizeof(float));
-  cudaMemset(loadVec, 0, freeSize*sizeof(float));
+  cudaMallocManaged(&loadVec, freeSize*sizeof(double));
+  cudaMemset(loadVec, 0, freeSize*sizeof(double));
   for (unsigned int i = 0; i < LoadVector_dof_i.size(); i++) {
     loadVec[dofFree[LoadVector_dof_i[i]-1]-1] = LoadVector_value[i];
   }
 }
 
-float* Load::get_vector() const { return loadVec;}
+double* Load::get_vector() const { return loadVec;}
 
 // Struct Dof
 Dof::Dof() { };

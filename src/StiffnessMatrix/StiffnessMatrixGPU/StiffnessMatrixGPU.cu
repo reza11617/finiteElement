@@ -16,8 +16,8 @@ StiffnessMatrixGPU::StiffnessMatrixGPU(Material& mat, Geometry &geo, unsigned in
   int device = -1;
   cudaGetDevice(&device);
   // copy from the material matarix
-  cudaMallocManaged(&D_d, 6*sizeof(float));
-  cudaMemcpy(D_d, material->materialMatrix, 6*sizeof(float), cudaMemcpyHostToDevice);
+  cudaMallocManaged(&D_d, 6*sizeof(double));
+  cudaMemcpy(D_d, material->materialMatrix, 6*sizeof(double), cudaMemcpyHostToDevice);
   cudaDeviceSynchronize();
   Log::Logger().Info("StiffnessMatrixGPU created by CPU");
 };
@@ -28,7 +28,7 @@ StiffnessMatrixGPU::~StiffnessMatrixGPU()
   cudaFree(D_d);
 }
 
-__global__ void constantCreatorKernel(int n, float* c, float* x, float* y, unsigned int* mesh, StiffnessMatrixGPU *s)
+__global__ void constantCreatorKernel(int n, double* c, double* x, double* y, unsigned int* mesh, StiffnessMatrixGPU *s)
 {
   //printf("in the function\n blockDim.x = %d, gridDim.x = %d, blockIdx.x = %d\n", blockDim.x,gridDim.x, blockIdx.x);
   int index = threadIdx.x + blockIdx.x * blockDim.x;
@@ -41,7 +41,7 @@ __global__ void constantCreatorKernel(int n, float* c, float* x, float* y, unsig
 };
 
 
-__global__ void StiffnessMatrixKernel(unsigned int n, unsigned int nip, float* in, unsigned int* ip, float* iw, float* c, float* D, unsigned int* mesh, float* k, unsigned int* i_index, unsigned int *j_index, unsigned int* rowPtr, unsigned int* dofFree,StiffnessMatrixGPU *obj)
+__global__ void StiffnessMatrixKernel(unsigned int n, unsigned int nip, double* in, unsigned int* ip, double* iw, double* c, double* D, unsigned int* mesh, double* k, unsigned int* i_index, unsigned int *j_index, unsigned int* rowPtr, unsigned int* dofFree,StiffnessMatrixGPU *obj)
 {
   int index  = threadIdx.x + blockIdx.x * blockDim.x;
   int stride = blockDim.x * gridDim.x;

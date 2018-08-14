@@ -1,6 +1,6 @@
 #include "StiffnessMatrixFirstOrder.h"
 
-void StiffnessMatrixFirstOrder::constantCreator(unsigned int numberElement, float* c, float* x, float* y, unsigned int* mesh)
+void StiffnessMatrixFirstOrder::constantCreator(unsigned int numberElement, double* c, double* x, double* y, unsigned int* mesh)
 {
   unsigned int i = numberElement*6;
   c[i++] = (x[mesh[numberElement*4+0]] - x[mesh[numberElement*4+1]] + x[mesh[numberElement*4+2]] - x[mesh[numberElement*4+3]])/4; 
@@ -12,7 +12,7 @@ void StiffnessMatrixFirstOrder::constantCreator(unsigned int numberElement, floa
   // defined the constants c1x to c3y
 };
 
-void StiffnessMatrixFirstOrder::stiffnessMatrixCalculation(unsigned int numberElement, unsigned int nip ,float* in, unsigned int* ip, float* iw, float* c, float* D, unsigned int* mesh, float* k, unsigned int* i_index, unsigned int* j_index, unsigned int* rowPtr, unsigned int* dofFree)
+void StiffnessMatrixFirstOrder::stiffnessMatrixCalculation(unsigned int numberElement, unsigned int nip ,double* in, unsigned int* ip, double* iw, double* c, double* D, unsigned int* mesh, double* k, unsigned int* i_index, unsigned int* j_index, unsigned int* rowPtr, unsigned int* dofFree)
 // numberElement -> the element number needed to be calculated
 // nip is the number of integration point squared.
 // in is the integrationNode
@@ -28,7 +28,7 @@ void StiffnessMatrixFirstOrder::stiffnessMatrixCalculation(unsigned int numberEl
 // dofFree -> lists the free dofs and value for new Dofs
 {
   // define local stiffness Matrix
-  float kLocal[36] = {}; 
+  double kLocal[36] = {}; 
   for (unsigned int noIP = 0; noIP < nip; noIP++) { 
     // noIP -> the integration point number needed to be calculated
     double XI = in[ip[2*noIP]]; double YI = in[ip[2*noIP+1]];
@@ -124,7 +124,7 @@ StiffnessMatrixFirstOrder::StiffnessMatrixFirstOrder(Material& mat, Geometry& ge
   simulationSize = numberOfElements;
   stiffMat = new Sparse(stiffMatSize,geometry->get_Dof().get_freeSize());
   //  stiffMat = new Sparse(stiffMatSize,geometry->get_x_y_size()*2);
-  cudaMallocManaged(&c,numberOfElements*6*sizeof(float));
+  cudaMallocManaged(&c,numberOfElements*6*sizeof(double));
 };
 
 StiffnessMatrixFirstOrder::~StiffnessMatrixFirstOrder() {

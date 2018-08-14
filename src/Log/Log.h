@@ -27,7 +27,6 @@ public:
   void Info(const std::string&);
   void Info(const double);
   void Info(const unsigned int *, unsigned int);
-  void Info(const float *, unsigned int);
   void Info(const double *, unsigned int);
 };
   

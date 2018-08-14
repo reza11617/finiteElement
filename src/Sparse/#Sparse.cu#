@@ -34,7 +34,7 @@ Sparse::~Sparse() {
 void Sparse::Assemble(double tol)
 // coo -> a triplet sparse format
 {
-  type = 1; // type is CSC
+  type = 0; // type is CSC
   unsigned int * a_temp_i;  unsigned int * a_temp_j; double * a_temp_value;
   // build the indices vector
   unsigned int* indices = new unsigned int[valueSize];
@@ -160,7 +160,7 @@ sort_indices_j::sort_indices_j(Sparse* sparseMatrix)
 
 bool sort_indices_j::operator()(unsigned int i, unsigned int j) {
   if (dofSorted[i] == dofSorted[j]) {
-    x[i] = x[i] + x[j]; x[j] = 0;
+    x[i] = x[i] + x[j]; x[j] = 0;\
     return false;
   } else {return dofSorted[i] < dofSorted[j];}
 };

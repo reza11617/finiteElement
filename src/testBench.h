@@ -19,5 +19,5 @@
 
 int main();
 Geometry& geometry();
-float maxError(StiffnessMatrix& , StiffnessMatrix&);
+double maxError(StiffnessMatrix& , StiffnessMatrix&);
 #endif

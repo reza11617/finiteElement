@@ -29,10 +29,10 @@ protected:
   unsigned int numberOfIntegrationPoint;
   unsigned int numberOfElements; //number of elements
   unsigned int nipSquared; // number of interation point squared
-  float* integrationNode; unsigned int* integrationPos; float* integrationWeight;
+  double* integrationNode; unsigned int* integrationPos; double* integrationWeight;
   Material* material;
   Geometry* geometry;
-  float* c;
+  double* c;
   unsigned int sizeStiffMatPerEle;
   unsigned int simulationSize;
   unsigned int stiffMatSize;

@@ -8,7 +8,7 @@
 class Timer {
 public:
   std::chrono::time_point<std::chrono::system_clock> start, end;
-  std::chrono::duration<float> duration;
+  std::chrono::duration<double> duration;
   std::string message;
   Timer();
   Timer(const std::string &);

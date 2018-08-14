@@ -13,20 +13,20 @@ class SolverSp {
 private:
   int* rowPtr;
   int* colIndices;
-  float* sparseMatrix;  // matrix has to be CSR
-  float* rightHandSideVector;
-  float* leftHandSideVector;
+  double* sparseMatrix;  // matrix has to be CSR
+  double* rightHandSideVector;
+  double* leftHandSideVector;
   int nnz; // number of non-zeros
   int N; // size of the matrix and vectors
-  float tolerance; // tolerance to decide singularity
+  double tolerance; // tolerance to decide singularity
   int reorder;
 public:
-  SolverSp(float*, unsigned int*, unsigned int*, unsigned int, unsigned int, float*, float*);
-  //SolverSp(float*, unsigned int*, unsigned int*, unsigned int, unsigned int,float*, float*, float);
+  SolverSp(double*, unsigned int*, unsigned int*, unsigned int, unsigned int, double*, double*);
+  //SolverSp(double*, unsigned int*, unsigned int*, unsigned int, unsigned int,double*, double*, double);
   ~SolverSp();
 private:
-  int SolverSpChol(float*, int*, int*);
-  void SolverSpQR(float*, int*, int*);
+  int SolverSpChol(double*, int*, int*);
+  void SolverSpQR(double*, int*, int*);
   void fixMatrices();
 };
 #endif

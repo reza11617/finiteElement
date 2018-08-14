@@ -12,15 +12,15 @@
 // Load Struct
 struct Load {
   // variables
-  std::vector<float> LoadVector_value;
+  std::vector<double> LoadVector_value;
   std::vector<unsigned int> LoadVector_dof_i;
-  float* loadVec; 
+  double* loadVec; 
   // methodes
   Load();
   ~Load();
-  void point(int, float, float);
+  void point(int, double, double);
   void build(unsigned int*, unsigned int);
-  float* get_vector() const;
+  double* get_vector() const;
 };
 
 // dof Struct
@@ -45,12 +45,12 @@ class Geometry {
 private:
   unsigned int counter;
   std::vector<unsigned int> meshTemp;
-  std::vector<float> xDim;
-  std::vector<float> yDim;
+  std::vector<double> xDim;
+  std::vector<double> yDim;
   unsigned int numberOfNodes;
   unsigned int numberOfElementsG;
-  float* x; float* x_d;
-  float* y; float* y_d;
+  double* x; double* x_d;
+  double* y; double* y_d;
   unsigned int* mesh;unsigned int* mesh_d;
 public:
   Load* load;
@@ -59,11 +59,11 @@ public:
 public:
   Geometry();
   ~Geometry();
-  void node(float, float);
+  void node(double, double);
   void modelBuild();
   void meshQuadrilateral(int,int,int,int);
-  float* get_x();
-  float* get_y();
+  double* get_x();
+  double* get_y();
   unsigned int get_x_y_size();
   unsigned int get_numberOfElementsG();
   unsigned int get_mesh_Size();
