@@ -20,7 +20,6 @@ public:
   unsigned int* i;
   unsigned int* j;
   unsigned int valueSize; //how many nonzeros
-  unsigned int* nnz_inRow; // number of non-zero in each row;
   unsigned int type;
 private:
   unsigned int numberOfRows; //number of rows

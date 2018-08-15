@@ -12,7 +12,7 @@ void StiffnessMatrixFirstOrder::constantCreator(unsigned int numberElement, doub
   // defined the constants c1x to c3y
 };
 
-void StiffnessMatrixFirstOrder::stiffnessMatrixCalculation(unsigned int numberElement, unsigned int nip ,double* in, unsigned int* ip, double* iw, double* c, double* D, unsigned int* mesh, double* k, unsigned int* i_index, unsigned int* j_index, unsigned int* rowPtr, unsigned int* dofFree)
+void StiffnessMatrixFirstOrder::stiffnessMatrixCalculation(unsigned int numberElement, unsigned int nip ,double* in, unsigned int* ip, double* iw, double* c, double* D, unsigned int* mesh, double* k, unsigned int* i_index, unsigned int* j_index, unsigned int* dofFree)
 // numberElement -> the element number needed to be calculated
 // nip is the number of integration point squared.
 // in is the integrationNode
@@ -24,7 +24,6 @@ void StiffnessMatrixFirstOrder::stiffnessMatrixCalculation(unsigned int numberEl
 // k -> pointer to stiffness matrix
 // i_index -> pointer to DOFi
 // j_index -> pointer to DOFj
-// rowptr -> pointer to an array holding the size of stiffness matrix in each row
 // dofFree -> lists the free dofs and value for new Dofs
 {
   // define local stiffness Matrix
@@ -107,7 +106,7 @@ void StiffnessMatrixFirstOrder::stiffnessMatrixCalculation(unsigned int numberEl
 	j_index[counter] = dofFree[min(dof_i-1,dof_j-1)];
 	k[counter] = kLocal[kcounter];
       }
-      rowPtr[i_index[counter]] = rowPtr[i_index[counter]] + 1;
+      //rowPtr[i_index[counter]] = rowPtr[i_index[counter]] + 1;
       counter++;
       kcounter++;
     }

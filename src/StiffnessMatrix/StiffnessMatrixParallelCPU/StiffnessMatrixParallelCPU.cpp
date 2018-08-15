@@ -49,5 +49,5 @@ void StiffnessMatrixParallelCPU::GetStiffnessMatrixForEachThread(unsigned int th
 {
   unsigned int counter = threadId*(simulationSize/concurentThreadsSupported);
   for (unsigned int i = 0; i<simulationPerThread[threadId]; i++)
-    stiffnessMatrixCalculation(counter+i, nipSquared,integrationNode, integrationPos, integrationWeight, c, material->materialMatrix, geometry->get_mesh(), stiffMat->value, stiffMat->i, stiffMat->j, stiffMat->nnz_inRow, geometry->get_Dof().get_free());
+    stiffnessMatrixCalculation(counter+i, nipSquared,integrationNode, integrationPos, integrationWeight, c, material->materialMatrix, geometry->get_mesh(), stiffMat->value, stiffMat->i, stiffMat->j, geometry->get_Dof().get_free());
 }

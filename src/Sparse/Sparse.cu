@@ -9,7 +9,6 @@ Sparse::Sparse(unsigned int x_size, unsigned int rowSize, unsigned int columnSiz
   cudaMallocManaged(&i, valueSize*sizeof(unsigned int));
   cudaMallocManaged(&j, valueSize*sizeof(unsigned int));  
   cudaMallocManaged(&value, valueSize*sizeof(double));
-  cudaMallocManaged(&nnz_inRow, (numberOfRows+1)*sizeof(unsigned int));
   cudaMemset(j,0,valueSize*sizeof(unsigned int));
   cudaMemset(i,0,valueSize*sizeof(unsigned int));
   cudaMemset(value, 0 , valueSize*sizeof(double));
@@ -27,7 +26,6 @@ Sparse::~Sparse() {
   cudaFree(i);
   cudaFree(j);
   cudaFree(value);
-  cudaFree(nnz_inRow);
 }
 
 // This function return a CSC matrix
@@ -43,20 +41,26 @@ void Sparse::Assemble(double tol)
   Timer timer("Time spend in assembley: ");
   // sorting i
   std::sort(indices,indices+valueSize, sort_indices(i));
+  // number on non-zeros in each row
+  unsigned int* nnz_inRow = new unsigned int[numberOfRows+1](); 
+  unsigned int rowCounter = 0;
+  for (unsigned int c = 0; c <= valueSize; c++) {
+    if (i[indices[c]] == rowCounter) {
+      nnz_inRow[rowCounter] = c+1;
+    } else {
+      rowCounter++;
+    }
+  }
   // sorting j 
   cudaMallocManaged(&a_temp_i, (numberOfRows+1)*sizeof(unsigned int));
-  unsigned int a = nnz_inRow[0], b = a;
   a_temp_i[0] = 0;// rowPtr
   for (unsigned int c = 1; c <= numberOfRows; c++) {
-    b = b + nnz_inRow[c];
-    std::sort(indices + a, indices + b, sort_indices_j(this));
+    std::sort(indices + nnz_inRow[c-1], indices + nnz_inRow[c], sort_indices_j(this));
     // -- remove the zero entries (counting the number of nnz in each row)
-    a_temp_i[c] = nnz_inRow[c];
-    for (unsigned int count = a; count < b; count++) 
-      if (abs(value[indices[count]]) < tol) {a_temp_i[c]--;}
+    a_temp_i[c] = 0;
+    for (unsigned int count = nnz_inRow[c-1]; count < nnz_inRow[c]; count++) 
+      if (abs(value[indices[count]]) > tol) {a_temp_i[c]++;}
     a_temp_i[c] += a_temp_i[c-1];
-    //
-    a = b;
   }
   // copy to new array
   cudaMallocManaged(&a_temp_j, (a_temp_i[numberOfRows])*sizeof(unsigned int)); 
@@ -76,6 +80,7 @@ void Sparse::Assemble(double tol)
   j = a_temp_j;
   value = a_temp_value;  
   delete[] indices;
+  delete[] nnz_inRow;
 }
 
 double Sparse::Compare(Sparse& A, Sparse& B)

@@ -9,11 +9,14 @@ int main() {
   Material mat(1000.0d, 0.3d);
   // -- Building stiffness matrix on CPU single core, CPU multiple core & GPU.
   StiffnessMatrixFirstOrder* stiffMat       = new StiffnessMatrixSingleCPU(mat,p_cantilever,2);
+  StiffnessMatrixFirstOrder* stiffMatParCPU = new StiffnessMatrixParallelCPU(mat,p_cantilever,2,10);
+  StiffnessMatrixFirstOrder* stiffMatGPU    = new StiffnessMatrixGPU(mat,p_cantilever,2);
   // -- Calculate the stiffness matrix and do the assembly
-  Sparse &k = stiffMat->GetStiffnessMatrix();
-  
+  Sparse &k1 = stiffMat->GetStiffnessMatrix();
+  Sparse &k2 = stiffMatParCPU->GetStiffnessMatrix();
+  Sparse &k = stiffMatGPU->GetStiffnessMatrix();
+  Recorder::File().SparseMatrix("kSingleCPU.out", k);
   k.Assemble(0.001);
-  //Recorder::File().SparseMatrix("kSingleCPU.out", k);
   // -- Solver
   double* displacement;
   cudaMallocManaged(&displacement, k.get_numberOfRows()*sizeof(double));
@@ -24,26 +27,24 @@ int main() {
   // -- Delete all variables in Heap memory
   cudaFree(displacement);
   delete stiffMat;
+  delete stiffMatParCPU;
+  delete stiffMatGPU;
   
-  //StiffnessMatrixFirstOrder* stiffMatParCPU = new StiffnessMatrixParallelCPU(mat,p_cantilever,4,5);
-  //StiffnessMatrixFirstOrder* stiffMatGPU    = new StiffnessMatrixGPU(mat,p_cantilever,2);
 
   //Sparse kCPU = stiffMatParCPU->GetStiffnessMatrix();
-  //Sparse kGPU = stiffMatGPU->GetStiffnessMatrix();
+  //
   
   //std::cout << Sparse::Compare(k,kGPU) << " is the Max Error"<<std::endl;
   
   // Log::Logger().Info(f.value[f.valueSize-1]);
 
-  //delete stiffMatParCPU;
-  //delete stiffMatGPU;
   return 0;
 }
 
 Geometry& geometry() {
   // GEOMETRY (building the contiliver)
-  double dimentionX = 10.0; int numberOfElementX = 800; // dimention of x and number of element in x
-  double dimentionY =  1.0; int numberOfElementY = 120; 
+  double dimentionX = 10.0; int numberOfElementX = 2; // dimention of x and number of element in x
+  double dimentionY =  1.0; int numberOfElementY = 2; 
   double incr_x = dimentionX/numberOfElementX; // increment between each node 
   double incr_y = dimentionY/numberOfElementY;
   Geometry* cantilever = new Geometry();
