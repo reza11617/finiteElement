@@ -3,9 +3,18 @@
 
 #include <iostream>
 #include <algorithm> 
+#include <thrust/sort.h>
 
 #include "../Log/Log.h"
 #include "../Timer/Timer.h"
+
+//macro
+#ifdef __CUDACC__
+#define CUDA_HOSTDEV __host__ __device__
+#else
+#define CUDA_HOSTDEV
+#endif
+
 
 //#include <cuda_runtime_api.h>
 //#include <cuda.h>
@@ -34,7 +43,11 @@ public:
   Sparse(unsigned int, unsigned int);
   Sparse();
   ~Sparse();
-  void Assemble(double);
+  void STLAssemble(double);
+  void STLAssemble2(double);
+  void ThrustAssemble(double);
+  void ThrustAssemble2(double);
+  
   void set_numberOfRows(unsigned int);
   void set_numberOfColumns(unsigned int);
   void set_valueSize(unsigned int);
@@ -66,8 +79,8 @@ struct sort_indices {
 private:
   unsigned int* dofSorted; // the variable that index is going to sorted base of
 public:
-  sort_indices(unsigned int*);
-  bool operator()(unsigned int i, unsigned int j) const;
+  CUDA_HOSTDEV sort_indices(unsigned int*);
+  CUDA_HOSTDEV bool operator()(unsigned int i, unsigned int j) const;
 };
 
 struct sort_indices_j {
@@ -75,7 +88,17 @@ private:
   double* x; // holds values of stiffness matrix
   unsigned int* dofSorted; // the variable that index is going to sorted base of
 public:
-  sort_indices_j(Sparse*); 
-  bool operator()(unsigned int i, unsigned int j);
+  CUDA_HOSTDEV sort_indices_j(unsigned int*, double*); 
+  CUDA_HOSTDEV bool operator()(unsigned int i, unsigned int j);
+};
+
+
+// -- new Sort
+struct newSort {
+  unsigned int nRow;
+  unsigned int* i; unsigned int* j;
+
+  CUDA_HOSTDEV newSort(unsigned int*, unsigned int*,unsigned int);
+  CUDA_HOSTDEV bool operator()(unsigned int, unsigned int) const;
 };
 #endif

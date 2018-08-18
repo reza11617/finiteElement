@@ -103,7 +103,7 @@ void Sparse::ThrustAssemble(double tol)
   cudaMallocManaged(&nnz_inRow, (numberOfRows+1)*sizeof(unsigned int));
   cudaMemset(nnz_inRow, 0, (numberOfRows+1)*sizeof(unsigned int));
   unsigned int rowCounter = 0;
-  for (unsigned int c = 0; c < valueSize; c++) {
+  for (unsigned int c = 0; c <Timer *timer = new Timer( valueSize; c++) {
     if (i[indices[c]] == rowCounter) {
       nnz_inRow[rowCounter] = c+1;
     } else {
@@ -218,8 +218,8 @@ void Sparse::ThrustAssemble2(double tol) {
   // timer
   Timer *timer = new Timer("Time spend in sorting for STL Assembley2: ");
   // sorting i
-  //std::sort(indices,indices+valueSize, newSort(i,j,numberOfRows));
-  thrust::sort(thrust::device,indices,indices+valueSize, newSort(i,j,numberOfRows));
+  std::sort(indices,indices+valueSize, newSort(i,j,numberOfRows));
+  //thrust::sort(thrust::device,indices,indices+valueSize, newSort(i,j,numberOfRows));
   delete timer; Timer t("Time for rest of STL Assembley2: ");
   // -- define rowPtr
   unsigned int* a_temp_i; cudaMallocManaged(&a_temp_i, (numberOfRows+1)*sizeof(unsigned int));
