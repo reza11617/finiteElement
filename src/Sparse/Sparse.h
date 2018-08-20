@@ -97,8 +97,9 @@ public:
 struct newSort {
   unsigned int nRow;
   unsigned int* i; unsigned int* j;
-
-  CUDA_HOSTDEV newSort(unsigned int*, unsigned int*,unsigned int);
-  CUDA_HOSTDEV bool operator()(unsigned int, unsigned int) const;
+  unsigned long long int a;
+  unsigned long long int b;
+  CUDA_HOSTDEV newSort(unsigned int*, unsigned int*, unsigned int);
+  CUDA_HOSTDEV bool operator()(unsigned int, unsigned int);
 };
 #endif

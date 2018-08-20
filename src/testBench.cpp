@@ -17,18 +17,21 @@ int main() {
   Sparse &k2 = stiffMatParCPU->GetStiffnessMatrix();
   Sparse &k = stiffMatGPU->GetStiffnessMatrix();
   Sparse &k3 = stiffMatGPU2->GetStiffnessMatrix();
-  Recorder::File().SparseMatrix("kSingleCPU.out", k);
-  k.STLAssemble(0.001);
+  k3.STLAssemble(0.001);
   k1.ThrustAssemble(0.001);
   k2.STLAssemble2(0.001);
-  k3.ThrustAssemble2(0.001);
+  k.ThrustAssemble2(0.001);
+  std::cout << Sparse::Compare(k,k3) << " is the Max Error"<<std::endl;
+  //Recorder::File().SparseMatrix("k.out", k);
+  //Recorder::File().SparseMatrix("k2.out", k2);
+  //Recorder::File().SparseMatrix("k3.out", k3);
   // -- Solver
-  //double* displacement;
-  //cudaMallocManaged(&displacement, k.get_numberOfRows()*sizeof(double));
-  //SolverSp(k.get_value(), k.get_i(), k.get_j(), k.get_valueSize(), k.get_numberOfRows(),
-  //p_cantilever.get_Load().get_vector(), displacement);
+  double* displacement;
+  cudaMallocManaged(&displacement, k.get_numberOfRows()*sizeof(double));
+  SolverSp(k.get_value(), k.get_i(), k.get_j(), k.get_valueSize(), k.get_numberOfRows(),
+	   p_cantilever.get_Load().get_vector(), displacement);
   // -- Recorder
-  //Log::Logger().Info(displacement[k.get_numberOfRows()-1]);
+  Log::Logger().Info(displacement[k.get_numberOfRows()-1]);
   //Recorder::File().matrix("displacement.out", displacement, k.get_numberOfRows());
   // -- Delete all variables in Heap memory
   //cudaFree(displacement);
@@ -49,8 +52,8 @@ int main() {
 
 Geometry& geometry() {
   // GEOMETRY (building the contiliver)
-  double dimentionX = 10.0; int numberOfElementX = 2000; // dimention of x and number of element in x
-  double dimentionY =  1.0; int numberOfElementY = 200; 
+  double dimentionX = 10.0; int numberOfElementX = 200; // dimention of x and number of element in x
+  double dimentionY =  1.0; int numberOfElementY = 20; 
   double incr_x = dimentionX/numberOfElementX; // increment between each node 
   double incr_y = dimentionY/numberOfElementY;
   Geometry* cantilever = new Geometry();

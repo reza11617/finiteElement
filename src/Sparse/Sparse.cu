@@ -153,6 +153,7 @@ double Sparse::Compare(Sparse& A, Sparse& B)
 }
 // -- new assemblers
 void Sparse::STLAssemble2(double tol) {
+  
   type = 1; // type is CSC
   // build the indices vector
   unsigned int* indices;  cudaMallocManaged(&indices, valueSize*sizeof(unsigned int));
@@ -162,7 +163,7 @@ void Sparse::STLAssemble2(double tol) {
   // sorting i
   std::sort(indices,indices+valueSize, newSort(i,j,numberOfRows));
   //thrust::sort(thrust::device,indices,indices+valueSize, newSort(i,j,numberOfRows));
-  delete timer; Timer t("Time for rest of STL Assembley2: ");
+  delete timer; timer = new Timer("Time for rest of STL Assembley2: ");
   // -- define rowPtr
   unsigned int* a_temp_i; cudaMallocManaged(&a_temp_i, (numberOfRows+1)*sizeof(unsigned int));
   cudaMemset(a_temp_i,0,(numberOfRows+1)*sizeof(unsigned int));
@@ -171,7 +172,7 @@ void Sparse::STLAssemble2(double tol) {
   while (!i[indices[zeroCounter]]) {zeroCounter++;}
   // -- add duplicates and creat the rowPtr
   size_t count;
-  for (unsigned int c = zeroCounter; c < valueSize-1; c++) {
+  for (unsigned int c = 0; c < valueSize-1; c++) {
     count = c+1;
     while (i[indices[c]] == i[indices[count]] && j[indices[c]] == j[indices[count]]) {
       value[indices[c]] += value[indices[count]];
@@ -180,21 +181,23 @@ void Sparse::STLAssemble2(double tol) {
     }
     if (abs(value[indices[c]]) > tol) {
       a_temp_i[i[indices[c]]]++;
-    } else {
-      i[indices[c]] = 0; 
-    }
+    } 
     c = count-1;
   }
   if (abs(value[indices[valueSize-1]]) > tol) {a_temp_i[i[indices[valueSize-1]]]++;}
+  // -- print to screen
+  //for (unsigned int c = 0; c < valueSize; c++)
+  //  std::cout<< c << '\t' << i[indices[c]] << '\t' << j[indices[c]] << '\t' << value[indices[c]] << '\n';
   // -- sum rowPtr
   for (unsigned int c = 1; c<=numberOfRows; c++)
     a_temp_i[c] += a_temp_i[c-1];
+  delete timer; Timer t("Time for copy of STL Assembley2: ");
   // copy to new variables
   unsigned int* a_temp_j; cudaMallocManaged(&a_temp_j,     (a_temp_i[numberOfRows])*sizeof(unsigned int)); 
   double*   a_temp_value; cudaMallocManaged(&a_temp_value, (a_temp_i[numberOfRows])*sizeof(double));
-  size_t valueCounter = 0;
-  for (unsigned int c = zeroCounter; c < valueSize; c++) {
-    if(i[indices[c]]) {
+  unsigned int valueCounter = 0;
+  for (unsigned int c = 0; c < valueSize; c++) {
+    if(abs(value[indices[c]]) > tol) {
       a_temp_j[valueCounter] = j[indices[c]]-1;
       a_temp_value[valueCounter] = value[indices[c]];
       valueCounter++;
@@ -219,6 +222,7 @@ void Sparse::ThrustAssemble2(double tol) {
   Timer *timer = new Timer("Time spend in sorting for STL Assembley2: ");
   // sorting i
   //std::sort(indices,indices+valueSize, newSort(i,j,numberOfRows));
+  cudaDeviceSynchronize();
   thrust::sort(thrust::device,indices,indices+valueSize, newSort(i,j,numberOfRows));
   delete timer; Timer t("Time for rest of STL Assembley2: ");
   // -- define rowPtr
@@ -334,6 +338,7 @@ sort_indices::sort_indices(unsigned int* var)
 bool sort_indices::operator()(unsigned int i, unsigned int j) const { return dofSorted[i] < dofSorted[j];};
 
 // ---------------------- sort_indices_j struct ------------------------- 
+
 sort_indices_j::sort_indices_j(unsigned int* j, double* value)
   : dofSorted(j), x(value) { };
 
@@ -344,13 +349,14 @@ bool sort_indices_j::operator()(unsigned int i, unsigned int j) {
   } else {return dofSorted[i] < dofSorted[j];}
 };
 
-
 // ----------------------- new Sort struct ---------------------
 newSort::newSort(unsigned int* i_index, unsigned int* j_index, unsigned int numberOfRows)
   : i(i_index), j(j_index), nRow(numberOfRows) {
 };
 
-bool newSort::operator()(unsigned int first, unsigned int second) const {
+bool newSort::operator()(unsigned int first, unsigned int second) {
   // compares the actual place in big stiffness matrix
-  return (i[first] *nRow+j[first]) < (i[second]*nRow+j[second]);
+  a = (unsigned long long int)(i[first]) *nRow + (unsigned long long int)(j[first]);
+  b = (unsigned long long int)(i[second])*nRow + (unsigned long long int)(j[second]);
+  return a < b;
 }
