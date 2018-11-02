@@ -97,7 +97,7 @@ void Sparse::ThrustAssemble(double tol)
   // timer
     Timer *timer = new Timer("Time spend in sorting for Thrust Assembley: ");
   // sorting i
-  thrust::sort(thrust::device,indices,indices+valueSize, sort_indices(i));
+  thrust::sort(indices,indices+valueSize, sort_indices(i));
   // number on non-zeros in each row
   unsigned int* nnz_inRow;
   cudaMallocManaged(&nnz_inRow, (numberOfRows+1)*sizeof(unsigned int));

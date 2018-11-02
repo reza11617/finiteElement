@@ -1,0 +1,28 @@
+*Running different GPU
+41;331;0c- calculating stiffness matrix using 1000x10000 elements
+Time spend in CPU using single core: 42389.3ms 
+Time spend in CPU using 4 cores is: 11206.9ms
+Time spend in CPU using 8 cores is: 5980.24ms
+Time spend in CPU using 10 cores is: 5182.14ms
+Time spend in CPU using 20 cores is: 2905.12ms
+Time spend in CPU using 40 cores is: ---
+Time spend in GPU TITAN Xp: 224.535ms
+Time spend in GPU 1070: 414ms
+Time spend in GPU 1060: 912.211ms
+Time spend in GPU 1050: 3222.88ms
+
+- Assembly of the stiffness Matrix
+Time spend in CPU using single core: 153909ms + 4042.47ms
+
+
+Time spend in GPU TITAN Xp: 1266.28ms + 9437.41ms
+Time spend in GPU 1070:     2659.82ms + 9437.41ms
+Time spend in GPU 1060:     3500.6ms  + 9437.41ms
+Time spend in GPU 1050:     90016.8ms 
+
+- Solver time for 100x10 elements
+Time spend in GPU TITAN Xp: 490ms
+Time spend in GPU 1070:     490ms
+Time spend in GPU 1060:     510ms
+Time spend in GPU 1050:     520ms
+~
