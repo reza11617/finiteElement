@@ -10,7 +10,7 @@ Time spend in GPU TITAN Xp: 224.535ms
 Time spend in GPU 1070: 414ms
 Time spend in GPU 1060: 912.211ms
 Time spend in GPU 1050: 3222.88ms
-
+Time spend in GPU 1030: 7191.68ms
 - Assembly of the stiffness Matrix
 Time spend in CPU using single core: 153909ms + 4042.47ms
 
@@ -19,7 +19,7 @@ Time spend in GPU TITAN Xp: 1266.28ms + 9437.41ms
 Time spend in GPU 1070:     2659.82ms + 9437.41ms
 Time spend in GPU 1060:     3500.6ms  + 9437.41ms
 Time spend in GPU 1050:     90016.8ms 
-
+Time              1030:     109785
 - Solver time for 100x10 elements
 Time spend in GPU TITAN Xp: 490ms
 Time spend in GPU 1070:     490ms

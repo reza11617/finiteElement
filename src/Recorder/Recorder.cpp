@@ -19,6 +19,14 @@ const void Recorder::SparseMatrix(const std::string& fileName , const Sparse& sp
   outfile.close();
 }
 
+const void Recorder::SparseMatrix(const std::string& fileName , const Assembly& sp) const {
+  std::ofstream outfile;
+  std::string fileName2 = std::string("output/") + fileName;
+  outfile.open(fileName2);//, iso::out | iso::trunc);
+  outfile << sp;
+  outfile.close();
+}
+
 Recorder& Recorder::File() {
   static Recorder instanceOfRecorder;
   return instanceOfRecorder;

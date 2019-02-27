@@ -2,7 +2,7 @@ GENCODE_SM35     := #-gencode arch=compute_35,code=sm_35
 GENCODE_FLAGS    := #$(#GENCODE_SM35)
 
 LDFLAGS   := -L/usr/local/cuda/lib64 -lcudart -lcudadevrt -L./lib -lm -lcxsparse -lpthread -lcusolver -lcusparse
-CCFLAGS   := -m64
+CCFLAGS   := -m64 -std=c++17
 
 #NVCCFLAGS := -m64 -dc -L/usr/local/cuda/lib64 -lcudart -lcudadevrt -L./lib
 NVCCFLAGS := -arch=compute_61 -m64 -std=c++11 -L/usr/local/cuda/lib64 -lcudart -lcudadevrt -lcusolver -lcusparse
@@ -23,7 +23,7 @@ endif
 
 
 # Common includes and paths for CUDA
-INCLUDES      := -I/usr/local/cuda/include -I. -I.. -I./include
+INCLUDES      :=  -I. -I.. -I./include -I/usr/local/cuda/include/
 
 # Additional parameters
 #MAXRREGCOUNT  :=  -po maxrregcount=16
@@ -38,13 +38,15 @@ OBJ_CU_1  = Sparse/Sparse.cu\
             StiffnessMatrix/StiffnessMatrix.cu\
             StiffnessMatrix/StiffnessMatrixFirstOrder/StiffnessMatrixFirstOrder.cu\
             StiffnessMatrix/StiffnessMatrixGPU/StiffnessMatrixGPU.cu\
+			Assembly/Assembly.cu\
 
 # CPU OBJS
 OBJ_CPP_1 = testBench.cpp Timer/Timer.cpp Log/Log.cpp\
             Geometry/Geometry.cpp Material/Material.cpp\
             StiffnessMatrix/StiffnessMatrixSingleCPU/StiffnessMatrixSingleCPU.cpp\
             StiffnessMatrix/StiffnessMatrixParallelCPU/StiffnessMatrixParallelCPU.cpp\
-            Recorder/Recorder.cpp SolverSp/SolverSp.cpp\
+            Recorder/Recorder.cpp SolverSp/SolverSp.cpp Assembly/AssemblySingleCpu.cpp\
+			Assembly/AssemblyParCpu.cpp\
 
 OBJ_CPP_2 = $(patsubst %,$(SRC)/%,$(OBJ_CPP_1))
 OBJ_CU_2  = $(patsubst %,$(SRC)/%,$(OBJ_CU_1))

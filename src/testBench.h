@@ -15,6 +15,9 @@
 #include "StiffnessMatrix/StiffnessMatrixGPU/StiffnessMatrixGPU.h"
 #include "Recorder/Recorder.h"
 #include "SolverSp/SolverSp.h"
+#include "Assembly/Assembly.h"
+#include "Assembly/AssemblySingleCpu.h"
+#include "Assembly/AssemblyParCpu.h"
 
 
 int main();

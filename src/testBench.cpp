@@ -8,16 +8,24 @@ int main() {
   Material mat(1000.0d, 0.3d);
   // -- Building stiffness matrix on CPU single core, CPU multiple core & GPU.
   //StiffnessMatrixFirstOrder* stiffMat       = new StiffnessMatrixSingleCPU(mat,p_cantilever,4); 
-  //StiffnessMatrixFirstOrder* stiffMatParCPU = new StiffnessMatrixParallelCPU(mat,p_cantilever,4,20);
+  // StiffnessMatrixFirstOrder* stiffMatParCPU = new StiffnessMatrixParallelCPU(mat,p_cantilever,4,20);
   StiffnessMatrixFirstOrder* stiffMatGPU    = new StiffnessMatrixGPU(mat,p_cantilever,4);
+  //StiffnessMatrixFirstOrder* stiffMatGPU2    = new StiffnessMatrixGPU(mat,p_cantilever,4);
   // -- Calculate the stiffness matrix and do the assembly
   //Sparse &k = stiffMat->GetStiffnessMatrix();
-  //Sparse &k = stiffMatParCPU->GetStiffnessMatrix();
   Sparse &k = stiffMatGPU->GetStiffnessMatrix();
+  //Sparse &k2 = stiffMatGPU2->GetStiffnessMatrix();
   //k.STLAssemble(0.001);
   //k.ThrustAssemble(0.001);
-  k.ThrustAssemble2(0.001);
   //std::cout << Sparse::Compare(k,k3) << " is the Max Error"<<std::endl;
+
+  //Assembly *a = new AssemblySingleCpu(k);
+  Assembly *a = new AssemblyParCpu(k,5);
+  a->calculateAssembly();
+  Recorder::File().SparseMatrix("assembly.out", a->stiffMat);
+  delete(a);
+
+  //k.ThrustAssemble2(0.001);
   //Recorder::File().SparseMatrix("k.out", k);
   //Recorder::File().SparseMatrix("k2.out", k2);
   //Recorder::File().SparseMatrix("k3.out", k3);
@@ -51,8 +59,8 @@ int main() {
 
 Geometry& geometry() {
   // GEOMETRY (building the contiliver)
-  double dimentionX = 100.0; int numberOfElementX = 10000; // dimention of x and number of element in x
-  double dimentionY =  10.0; int numberOfElementY = 1000; 
+  double dimentionX = 100.0; int numberOfElementX = 2; // dimention of x and number of element in x
+  double dimentionY =  10.0; int numberOfElementY = 2; 
   double incr_x = dimentionX/numberOfElementX; // increment between each node 
   double incr_y = dimentionY/numberOfElementY;
   Geometry* cantilever = new Geometry();

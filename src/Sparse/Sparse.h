@@ -7,6 +7,7 @@
 
 #include "../Log/Log.h"
 #include "../Timer/Timer.h"
+//#include "Assembly.h"
 
 //macro
 #ifdef __CUDACC__
@@ -72,7 +73,6 @@ public:
 };
 
 std::ostream& operator<< (std::ostream &, Sparse const& );
-
 
 
 struct sort_indices {
