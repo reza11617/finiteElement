@@ -19,6 +19,31 @@ int SubVecSize(int n)
     else
         return 0;
 }
+// BuildSubVector: Make the subvector ready for merge
+void BuildSubVector(std::vector<Pair> & s, size_t CTS)
+// s is the subvector
+// CTS the concurentThreadsSupported
+{
+    // Calculating the subvector entries
+    size_t subVectorSize = CTS + SubVecSize(CTS);
+    size_t counter = CTS;
+    size_t max = CTS;
+    size_t min = 1;
+    while (counter < subVectorSize) {
+        for (size_t i = min; i < max; i = i+2)
+        {
+            s[counter++] = Pair(std::min(s[i-1].x, s[i].x),
+                                std::max(s[i-1].y, s[i].y));
+        }
+        min = max + 1;
+        if (max%2) {
+            std::rotate(s.begin() + max - 1 , s.begin() + max  , s.begin() + counter);
+            min = max;
+        }
+        max = counter;        
+    }
+}
+
 void AssemblyParCpu::simulation_per_thread()
 {
     int simulationSize = v_dofi.size();
@@ -31,41 +56,6 @@ void AssemblyParCpu::simulation_per_thread()
         subVector[i] = Pair(i*loadPerThread,(i+1)*loadPerThread);
     }
     subVector[concurentThreadsSupported-1] = Pair((concurentThreadsSupported-1)*loadPerThread,(concurentThreadsSupported-1)*loadPerThread + loadLastThread);
-    
-    //
-    size_t counter = concurentThreadsSupported;
-    size_t max = concurentThreadsSupported;
-    size_t min = 1;
-    for (size_t i = min; i < max; i = i+2)
-    {
-        subVector[counter++] = Pair(std::min(subVector[i-1].x, subVector[i].x),
-                                    std::max(subVector[i-1].y, subVector[i].y));
-    }
-    if (max%2) 
-        std::rotate(subVector.begin() + max - 1 , subVector.begin() + max  , subVector.begin() + counter);
-
-
-    for (auto& ii : subVector)
-    {
-        std::cout << ii << "\n";
-    }
-    // building subvector for merging 
-/*     size_t counter = concurentThreadsSupported;
-    size_t max = concurentThreadsSupported;
-    size_t min = 1;
-    size_t col = 1;
-    while (max >= 2) {
-        for (size_t i = min; i < max; i = i+2) {
-            subVector[counter++] = Pair(subVector[i-1].x,subVector[i].y);
-        }
-        max = counter - max;
-        min = counter;
-    }
-    if (max%2) {
-        Log::Logger().Info(counter);
-        subVector[counter] = Pair(subVector[counter-1].x,subVector[counter-2].y);
-    }
-      */
 }
 
 AssemblyParCpu::~AssemblyParCpu() 
@@ -77,20 +67,13 @@ void AssemblyParCpu::eachSort(int ii)
 {
     std::sort(h_indices.begin() + subVector[ii].x, 
               h_indices.begin() + subVector[ii].y, 
-              [this](size_t i, size_t j) {
-                if (v_dofi[i] == 0 )
-                    return false;
-                if (v_dofi[j] == 0)
-                    return true;
-                if (v_dofi[i] == v_dofi[j])
-                    return v_dofj[i] < v_dofj[j];
-                return v_dofi[i] < v_dofi[j];
-                });
+              sort_indices_assembly(v_dofi,v_dofj));
 }
 
 // fix the merge to run in parallel
-void AssemblyParCpu::merge(int ii)
+void AssemblyParCpu::merge(size_t ii)
 {
+    
     const auto comparison = [this](size_t i, size_t j) {
     if (v_dofi[i] == 0 )
         return false;
@@ -100,11 +83,16 @@ void AssemblyParCpu::merge(int ii)
         return v_dofj[i] < v_dofj[j];
     return v_dofi[i] < v_dofi[j];
     };
-    
+    /*
     std::merge(h_indices.begin() + subVector[ii].x, h_indices.begin() + subVector[ii].y,
                h_indices.begin() + subVector[ii+1].x, h_indices.begin() + subVector[ii+1].y, 
                h_indices_new.begin() + std::min(subVector[ii].x, subVector[ii+1].x), 
                comparison);
+    */
+    std::inplace_merge(h_indices.begin() + subVector[ii].x, h_indices.begin() + subVector[ii].y,
+               h_indices.begin() + subVector[ii+1].y, comparison);
+
+    
 }
 
 void AssemblyParCpu::sort()
@@ -119,19 +107,41 @@ void AssemblyParCpu::sort()
     {
         t[i].join();
     }
-    h_indices_new = h_indices;
-    merge(0);
-    //subVector[3] = Pair(subVector[0].x,subVector[0+1].y);
-    h_indices = h_indices_new;
-    merge(2);
-    //subVector[4] = Pair(subVector[3].x,subVector[2].y);
-    h_indices = h_indices_new;
+    BuildSubVector(subVector, concurentThreadsSupported);
+    /*    for (auto& ii : subVector)
+    {
+        std::cout << ii << "\n";
+    } */
+    /*
+    // Calculating the subvector entries
+    size_t counter = 0;
+    size_t max = concurentThreadsSupported;
+    size_t min = 1;
+    int it = 0;
+    while (counter < subVector.size()-1) {
+        it = 0;
+        for (size_t i = min; i < max && counter < subVector.size()-2; i = i+2)
+        {
+            //std::cout<<counter<<std::endl;
+            t[it] = std::thread(&AssemblyParCpu::merge,this,counter);
+            counter = counter+2;
+            it++;
+        }
+        for (int iit = 0; iit < it; iit++)
+        {
+            t[iit].join();
+        }
+        min = max;
+        max = max + it;        
+    }
+    */
+
 
 }
 void AssemblyParCpu::calculateAssembly()
 {
     Timer *t = new Timer("Time in assembly par cpu -> ");
-    //sort();
+    sort();
     //nnzFinder();
     //addDuplicates();
     //eraseDuplicands();
@@ -147,7 +157,7 @@ void AssemblyParCpu::calculateAssembly()
         stiffMat.j[i] = v_dofj[i];
     }
 }
-
+// ========================================================================
 // pair class
 Pair::Pair(int a, int b)
 : x(a), y(b)

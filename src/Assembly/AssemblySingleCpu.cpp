@@ -27,17 +27,8 @@ AssemblySingleCpu::~AssemblySingleCpu()
 
 void AssemblySingleCpu::sort()
 {
-    const auto comparison = [this](size_t i, size_t j) {
-    if (v_dofi[i] == 0 )
-        return false;
-    if (v_dofi[j] == 0)
-        return true;
-    if (v_dofi[i] == v_dofi[j])
-        return v_dofj[i] < v_dofj[j];
-    return v_dofi[i] < v_dofi[j];
-    };
-    std::sort(h_indices.begin(), h_indices.end(), comparison);
-    //std::sort(h_indices.begin(), h_indices.end(), sort_indices_assembly(v_dofi,v_dofj));
+    Timer timer("Time spend in sort -> ");
+    std::sort(h_indices.begin(), h_indices.end(), sort_indices_assembly(v_dofi,v_dofj));
     // for (auto& ii : h_indices) {
     //     std::cout<< ii << "\n";
     // }
@@ -108,14 +99,14 @@ void AssemblySingleCpu::calculateAssembly()
 {
     Timer *t = new Timer("Time in assembly -> ");
     sort();
-    nnzFinder();
-    addDuplicates();
-    eraseDuplicands();
+    //nnzFinder();
+    //addDuplicates();
+    //eraseDuplicands();
     apply_permutation_in_place(v_value, h_indices);
     apply_permutation_in_place(v_dofi, h_indices);
     apply_permutation_in_place(v_dofj, h_indices);
     delete t;
-    stiffMat.valueSize = h_rowPtr.back();
+    //stiffMat.valueSize = h_rowPtr.back();
     for (size_t i = 0; i < stiffMat.valueSize; i++) {
         stiffMat.value[i] = v_value[i];
         stiffMat.i[i] = v_dofi[i];

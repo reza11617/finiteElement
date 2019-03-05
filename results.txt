@@ -13,7 +13,10 @@ Time spend in GPU 1050: 3222.88ms
 Time spend in GPU 1030: 7191.68ms
 - Assembly of the stiffness Matrix
 Time spend in CPU using single core: 153909ms + 4042.47ms
-
+Time spend in CPU using 4 cores is: 45707.1ms
+Time spend in CPU using 8 cores is: 24756.8ms
+Time spend in CPU using 10 cores is: 20942ms
+Time spend in CPU using 20 cores is: 10632.6ms
 
 Time spend in GPU TITAN Xp: 1266.28ms + 9437.41ms
 Time spend in GPU 1070:     2659.82ms + 9437.41ms

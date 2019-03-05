@@ -2,7 +2,7 @@ GENCODE_SM35     := #-gencode arch=compute_35,code=sm_35
 GENCODE_FLAGS    := #$(#GENCODE_SM35)
 
 LDFLAGS   := -L/usr/local/cuda/lib64 -lcudart -lcudadevrt -L./lib -lm -lcxsparse -lpthread -lcusolver -lcusparse
-CCFLAGS   := -m64 -std=c++17
+CCFLAGS   := -O3 -m64 -std=c++17
 
 #NVCCFLAGS := -m64 -dc -L/usr/local/cuda/lib64 -lcudart -lcudadevrt -L./lib
 NVCCFLAGS := -arch=compute_61 -m64 -std=c++11 -L/usr/local/cuda/lib64 -lcudart -lcudadevrt -lcusolver -lcusparse

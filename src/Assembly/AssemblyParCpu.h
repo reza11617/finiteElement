@@ -22,8 +22,6 @@ public:
     int concurentThreadsSupported;
     std::vector<Pair> subVector;
 
-    std::vector<size_t> h_indices_new;
-
     AssemblyParCpu(Sparse&, int);
     AssemblyParCpu(Sparse&);
     ~AssemblyParCpu();
@@ -31,7 +29,7 @@ public:
     void eachSort(int);
     void sort() override;
     void calculateAssembly() override;
-    void merge(int ii);
+    void merge(size_t ii);
 };
 
 
