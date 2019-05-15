@@ -10,19 +10,22 @@ int main() {
   //StiffnessMatrixFirstOrder* stiffMat       = new StiffnessMatrixSingleCPU(mat,p_cantilever,4); 
   // StiffnessMatrixFirstOrder* stiffMatParCPU = new StiffnessMatrixParallelCPU(mat,p_cantilever,4,20);
   StiffnessMatrixFirstOrder* stiffMatGPU    = new StiffnessMatrixGPU(mat,p_cantilever,4);
-  StiffnessMatrixFirstOrder* stiffMatGPU2    = new StiffnessMatrixGPU(mat,p_cantilever,4);
+  //StiffnessMatrixFirstOrder* stiffMatGPU2    = new StiffnessMatrixGPU(mat,p_cantilever,4);
   // -- Calculate the stiffness matrix and do the assembly
   //Sparse &k = stiffMat->GetStiffnessMatrix();
   Sparse &k = stiffMatGPU->GetStiffnessMatrix();
-  Sparse &k2 = stiffMatGPU2->GetStiffnessMatrix();
+  //Sparse &k2 = stiffMatGPU2->GetStiffnessMatrix();
   //std::cout << Sparse::Compare(k,k2) << " is the Max Error"<<std::endl;
   //k2.STLAssemble2(0.001);
-  //k.ThrustAssemble(0.001);
-  //Recorder::File().SparseMatrix("assembly1.out", k2);
-  //Assembly *a = new AssemblySingleCpu(k);
-  Assembly *a = new AssemblyParCpu(k,20);
+  Recorder::File().SparseMatrix("assemblyBefore.out", k);
+  //k.ThrustAssemble2(0.001);
+  //Recorder::File().SparseMatrix("assembly1.out", k);
+  
+  /* method for doing the assembly in single and multiple cpu */
+  Assembly *a = new AssemblySingleCpu(k);
+  //Assembly *a = new AssemblyParCpu(k,20);
   a->calculateAssembly();
-  //Recorder::File().SparseMatrix("assembly2.out", a->stiffMat);
+  Recorder::File().SparseMatrix("assembly2.out", a->stiffMat);
   delete(a);
 
   //k.ThrustAssemble2(0.001);
@@ -59,8 +62,8 @@ int main() {
 
 Geometry& geometry() {
   // GEOMETRY (building the contiliver)
-  double dimentionX = 100.0; int numberOfElementX = 10000; // dimention of x and number of element in x
-  double dimentionY =  10.0; int numberOfElementY = 1000; 
+  double dimentionX = 100.0; int numberOfElementX = 2; // dimention of x and number of element in x
+  double dimentionY =  10.0; int numberOfElementY = 2; 
   double incr_x = dimentionX/numberOfElementX; // increment between each node 
   double incr_y = dimentionY/numberOfElementY;
   Geometry* cantilever = new Geometry();

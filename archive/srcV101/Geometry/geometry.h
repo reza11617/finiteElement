@@ -2,19 +2,27 @@
 #define GEOMETRY_H
 
 #include <iostream>
-#include <vector>
+#include "../Log/Log.h"
 
 // Geometry class
 class Geometry {
 private:
-  double dimentionX_ ;
-  double dimentionY_ ;
-  unsigned int NOEx_;
-  unsigned int NOEy_;
+  float dimentionX_;
+  float dimentionY_;
+  unsigned int numberOfElementX_;
+  unsigned int numberOfElementY_;
 public:
-  Geometry(double, double, unsigned int, unsigned int);
-  void nodeDimentionVector(std::vector<double>&, std::vector<double>&);
-  void meshCantilever(std::vector<unsigned int>&);
+  unsigned int numberOfElementsG;
+  unsigned int numberOfNodes;
+  unsigned int* mesh;
+  float* x;
+  float* y;
+public:
+  Geometry(float, float, unsigned int, unsigned int);
+  Geometry(const Geometry& geometry);
+  void nodeDimentionVector();
+  void meshCantilever();
+  ~Geometry();
 };
 
 #endif

@@ -1,30 +1,48 @@
-#include "geometry.h"
+#include "Geometry.h"
 
-Geometry::Geometry(double x, double y, unsigned int m, unsigned int n) {
-  dimentionX_ = x;
-  dimentionY_ = y;
-  NOEx_ = m;
-  NOEy_ = n;
+Geometry::Geometry(float dim_x, float dim_y, unsigned int numberOfElementX, unsigned int numberOfElementy)
+  : dimentionX_(dim_x), dimentionY_(dim_y), numberOfElementX_(numberOfElementX), numberOfElementY_(numberOfElementy)
+{
+  nodeDimentionVector();
+  meshCantilever();
 };
 
-void Geometry::nodeDimentionVector(std::vector<double>& x, std::vector<double>& y) {
+Geometry::Geometry(const Geometry& geometry)
+  : dimentionX_(geometry.dimentionX_), dimentionY_(geometry.dimentionY_), numberOfElementX_(geometry.numberOfElementX_), numberOfElementY_(geometry.numberOfElementY_)
+{
+  Log::Logger().Warning("Copied");
+};
+
+Geometry::~Geometry()
+{
+  Log::Logger().Info("Geometry Deleted");
+  delete[] mesh;
+  delete[] x;
+  delete[] y;
+};
+
+
+void Geometry::nodeDimentionVector() {
   // this function numbers the nodes the use method for numbering is
   /*
     6 --- 7 --- 8
     3 --- 4 --- 5
     0 --- 1 --- 2
   */
-  double incr_x = dimentionX_/NOEx_;
-  double incr_y = dimentionY_/NOEy_;
-  for (unsigned int j = 0; j <= NOEy_; j++){
-    for (unsigned int i = 0; i <= NOEx_; i++){
-      x.push_back(i*incr_x);
-      y.push_back(j*incr_y);
+  numberOfNodes = (numberOfElementX_ + 1)*(numberOfElementY_ + 1);
+  x = new float[numberOfNodes];
+  y = new float[numberOfNodes];
+  float incr_x = dimentionX_/numberOfElementX_;
+  float incr_y = dimentionY_/numberOfElementY_;
+  for (unsigned int j = 0; j <= numberOfElementY_; j++) {
+    for (unsigned int i = 0; i <= numberOfElementX_; i++) {
+      x[i + j*(numberOfElementX_+1)] = i * incr_x;
+      y[i + j*(numberOfElementX_+1)] = j * incr_y;
     }
   }
 };
 
-void Geometry::meshCantilever(std::vector<unsigned int>& elements)
+void Geometry::meshCantilever()
 {
   // this function meshes a contilever
   /*
@@ -33,15 +51,19 @@ void Geometry::meshCantilever(std::vector<unsigned int>& elements)
     3 --- 4 --- 5
     |  1  |  2  |
     0 --- 1 --- 2
-   */
-  unsigned int x = NOEx_+1;
-  unsigned int y = NOEy_;
-  for (unsigned int i = 0; i < NOEy_; i++){
-    for (unsigned int j = 0; j < NOEx_; j++){
-      elements.push_back(i*x+j);
-      elements.push_back(i*x+1+j);
-      elements.push_back((i+1)*x+1+j);
-      elements.push_back((i+1)*x+j);
+  */
+  numberOfElementsG = numberOfElementX_*numberOfElementY_;
+  unsigned int elementNodes = 4; // how many nodes per element
+  unsigned int eleNumber = 0;
+  mesh = new unsigned int[numberOfElementsG*elementNodes];
+  unsigned int xElement = numberOfElementX_+1;
+  for (unsigned int i = 0; i < numberOfElementY_; i++){
+    for (unsigned int j = 0; j < numberOfElementX_; j++){
+      unsigned int eleNumber = (j + i*numberOfElementY_)*elementNodes;
+      mesh[eleNumber++] = i*xElement+j;
+      mesh[eleNumber++] = i*xElement+1+j;
+      mesh[eleNumber++] = (i+1)*xElement+1+j;
+      mesh[eleNumber++] = (i+1)*xElement+j;
     }
   }
 };
