@@ -24,7 +24,7 @@ public:
   virtual ~StiffnessMatrixFirstOrder();
   virtual Sparse& GetStiffnessMatrix() = 0;
   int GetStiffnessMatrixSize() override;
-  CUDA_HOSTDEV void stiffnessMatrixCalculation(unsigned int, unsigned int, double*, unsigned int*, double*, double*, double*, unsigned int* ,double*, unsigned int*, unsigned int*, unsigned int*);
+  CUDA_HOSTDEV void stiffnessMatrixCalculation(unsigned int, unsigned int, double*, unsigned int*, double*, double*, double*, unsigned int* ,double*, unsigned int*, unsigned int*, unsigned int*, const double*);
   CUDA_HOSTDEV void constantCreator(unsigned int numberElement, double* c, double* x, double* y, unsigned int* mesh);
 protected:
 private:

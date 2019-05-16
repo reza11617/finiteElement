@@ -17,32 +17,36 @@ int main() {
   //Sparse &k2 = stiffMatGPU2->GetStiffnessMatrix();
   //std::cout << Sparse::Compare(k,k2) << " is the Max Error"<<std::endl;
   //k2.STLAssemble2(0.001);
-  Recorder::File().SparseMatrix("assemblyBefore.out", k);
+  //Recorder::File().SparseMatrix("assemblyBefore.out", k);
   //k.ThrustAssemble2(0.001);
   //Recorder::File().SparseMatrix("assembly1.out", k);
   
   /* method for doing the assembly in single and multiple cpu */
-  Assembly *a = new AssemblySingleCpu(k);
+  //Assembly *a = new AssemblySingleCpu(k);
   //Assembly *a = new AssemblyParCpu(k,20);
-  a->calculateAssembly();
-  Recorder::File().SparseMatrix("assembly2.out", a->stiffMat);
-  delete(a);
+  //a->calculateAssembly();
+  //Recorder::File().SparseMatrix("assembly2.out", a->stiffMat);
+  //delete(a);
 
-  //k.ThrustAssemble2(0.001);
-  //Recorder::File().SparseMatrix("k.out", k);
-  //Recorder::File().SparseMatrix("k2.out", k2);
-  //Recorder::File().SparseMatrix("k3.out", k3);
+  k.ThrustAssemble2(0.001);
+  Recorder::File().SparseMatrix("k.out", k);
   // -- Solver
-  /*
+  
   double* displacement;
   cudaMallocManaged(&displacement, k.get_numberOfRows()*sizeof(double));
   cudaMallocManaged(&displacement, k.get_numberOfRows()*sizeof(double));
-  SolverSp(k.get_value(), k.get_i(), k.get_j(), k.get_valueSize(), k.get_numberOfRows(),
-  	   p_cantilever.get_Load().get_vector(), displacement);
+  //Solver(N, nz, val, rowPtr, colIndex, x, rhs); 
+  Solver(k.get_numberOfRows(), k.get_valueSize(), k.get_value(), (int*) k.get_i(), (int*) k.get_j(),
+  	   displacement, p_cantilever.get_Load().get_vector());
   // -- Recorder
   Log::Logger().Info(displacement[k.get_numberOfRows()-1]);
-  */
-  //Recorder::File().matrix("displacement.out", displacement, k.get_numberOfRows());
+  Recorder::File().matrix("displacement.out", displacement, k.get_numberOfRows());
+  
+
+
+
+  //Recorder::File().SparseMatrix("k2.out", k2);
+  //Recorder::File().SparseMatrix("k3.out", k3);
   // -- Delete all variables in Heap memory
   //cudaFree(displacement);
   //delete stiffMat;
@@ -62,8 +66,8 @@ int main() {
 
 Geometry& geometry() {
   // GEOMETRY (building the contiliver)
-  double dimentionX = 100.0; int numberOfElementX = 2; // dimention of x and number of element in x
-  double dimentionY =  10.0; int numberOfElementY = 2; 
+  double dimentionX = 100.0; int numberOfElementX = 100; // dimention of x and number of element in x
+  double dimentionY =  10.0; int numberOfElementY = 10; 
   double incr_x = dimentionX/numberOfElementX; // increment between each node 
   double incr_y = dimentionY/numberOfElementY;
   Geometry* cantilever = new Geometry();
@@ -77,6 +81,8 @@ Geometry& geometry() {
       cantilever->node(i * incr_x, j * incr_y);
       // Node(x,y): build nodes for the geometry
   }
+  cantilever->set_thickness(1.00);
+
   for (unsigned int j = 0; j <= numberOfElementY; j++)
     cantilever->dof->fix(j*(numberOfElementX+1),1,1);
   cantilever->load->point((numberOfElementX+1)*(numberOfElementY+1),0.0d,-0.1d); // pointLoad(NodeNumber,DOF(1 for x 2 for y), value(N))

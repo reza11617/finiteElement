@@ -13,6 +13,7 @@ Geometry::~Geometry() {
   cudaFree(x_d);
   cudaFree(y_d);
   cudaFree(mesh_d);
+  cudaFree(thickness_array_d);
   
   delete load;
   delete dof;
@@ -48,10 +49,17 @@ void Geometry::modelBuild() {
   dof->build(numberOfNodes);
   // building the load vector
   load->build(dof->get_free(), dof->get_freeSize());
+
+  // creating the thickness array
+  cudaMallocManaged(&thickness_array_d, meshTemp.size()*sizeof(double));
+  for(int iter = 0; iter < meshTemp.size(); iter++) {thickness_array_d[iter] = thickness;}
+
+  // cuda device sync
   cudaDeviceSynchronize();
 }
 
-
+void Geometry::set_thickness(double t) {  thickness = t;}
+const double* Geometry::get_thickness() const {  return thickness_array_d;}
 double* Geometry::get_x() { return x_d;}
 double* Geometry::get_y() { return y_d;}
 unsigned int* Geometry::get_mesh() { return mesh_d;}

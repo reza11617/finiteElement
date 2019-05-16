@@ -12,7 +12,7 @@ void StiffnessMatrixFirstOrder::constantCreator(unsigned int numberElement, doub
   // defined the constants c1x to c3y
 };
 
-void StiffnessMatrixFirstOrder::stiffnessMatrixCalculation(unsigned int numberElement, unsigned int nip ,double* in, unsigned int* ip, double* iw, double* c, double* D, unsigned int* mesh, double* k, unsigned int* i_index, unsigned int* j_index, unsigned int* dofFree)
+void StiffnessMatrixFirstOrder::stiffnessMatrixCalculation(unsigned int numberElement, unsigned int nip ,double* in, unsigned int* ip, double* iw, double* c, double* D, unsigned int* mesh, double* k, unsigned int* i_index, unsigned int* j_index, unsigned int* dofFree, const double* thickness)
 // numberElement -> the element number needed to be calculated
 // nip is the number of integration point squared.
 // in is the integrationNode
@@ -25,6 +25,7 @@ void StiffnessMatrixFirstOrder::stiffnessMatrixCalculation(unsigned int numberEl
 // i_index -> pointer to DOFi
 // j_index -> pointer to DOFj
 // dofFree -> lists the free dofs and value for new Dofs
+// thickness -> thickness of each element
 {
   // define local stiffness Matrix
   double kLocal[64] = {}; 
@@ -35,7 +36,9 @@ void StiffnessMatrixFirstOrder::stiffnessMatrixCalculation(unsigned int numberEl
     double J11 = c[numberElement*6+0]*YI-c[numberElement*6+1]; double J12 = c[numberElement*6+3]*YI-c[numberElement*6+4];
     double J21 = c[numberElement*6+0]*XI-c[numberElement*6+2]; double J22 = c[numberElement*6+3]*XI-c[numberElement*6+5];
     double detJ = J11*J22-J12*J21;
-    double WeightPerDetJ = (iw[ip[2*noIP]]*iw[ip[2*noIP+1]])/detJ;
+    double WeightPerDetJ = t*(iw[ip[2*noIP]]*iw[ip[2*noIP+1]])/detJ;
+    // thickness of the element
+    double t = thickness[numberElement];
     // derveativs of the shape function N1x N2x ... N1y N2y ...
     double Ni[8] = {J22*( YI-1)/4 -  J12*( XI-1)/4, J22*(-YI+1)/4 -  J12*(-XI-1)/4, \
 		    J22*( YI+1)/4 -  J12*( XI+1)/4, J22*(-YI-1)/4 -  J12*(-XI+1)/4, \

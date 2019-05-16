@@ -47,6 +47,8 @@ private:
   std::vector<unsigned int> meshTemp;
   std::vector<double> xDim;
   std::vector<double> yDim;
+  double thickness;
+  double* thickness_array_d;
   unsigned int numberOfNodes;
   unsigned int numberOfElementsG;
   double* x; double* x_d;
@@ -70,6 +72,8 @@ public:
   unsigned int* get_mesh();
   const Dof& get_Dof() const;
   const Load& get_Load() const;
+  const double* get_thickness() const;
+  void set_thickness(double t); 
 };
 
 #endif

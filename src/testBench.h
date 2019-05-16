@@ -18,6 +18,7 @@
 #include "Assembly/Assembly.h"
 #include "Assembly/AssemblySingleCpu.h"
 #include "Assembly/AssemblyParCpu.h"
+#include "Solver/Solver.h"
 
 
 int main();
