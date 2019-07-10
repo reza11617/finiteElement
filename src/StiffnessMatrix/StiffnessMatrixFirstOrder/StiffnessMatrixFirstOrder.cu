@@ -36,9 +36,9 @@ void StiffnessMatrixFirstOrder::stiffnessMatrixCalculation(unsigned int numberEl
     double J11 = c[numberElement*6+0]*YI-c[numberElement*6+1]; double J12 = c[numberElement*6+3]*YI-c[numberElement*6+4];
     double J21 = c[numberElement*6+0]*XI-c[numberElement*6+2]; double J22 = c[numberElement*6+3]*XI-c[numberElement*6+5];
     double detJ = J11*J22-J12*J21;
-    double WeightPerDetJ = t*(iw[ip[2*noIP]]*iw[ip[2*noIP+1]])/detJ;
     // thickness of the element
     double t = thickness[numberElement];
+    double WeightPerDetJ = t*(iw[ip[2*noIP]]*iw[ip[2*noIP+1]])/detJ;
     // derveativs of the shape function N1x N2x ... N1y N2y ...
     double Ni[8] = {J22*( YI-1)/4 -  J12*( XI-1)/4, J22*(-YI+1)/4 -  J12*(-XI-1)/4, \
 		    J22*( YI+1)/4 -  J12*( XI+1)/4, J22*(-YI-1)/4 -  J12*(-XI+1)/4, \
@@ -55,77 +55,77 @@ void StiffnessMatrixFirstOrder::stiffnessMatrixCalculation(unsigned int numberEl
     // find the position to start filling the stiffness matrix
     // writes all 64 components of the 8 by 8 symmteric stiffness Matrix (storing upper triangle)
     unsigned int entry = 0;
-             kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[0]*N[0] + 2*D[4]*N[4] + D[2]*N[26]); //1,1             
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[0] + D[5]*N[26] + D[3]*N[4] + D[2]*N[4]); //2,1
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[0]*N[1] + D[4]*N[5] + D[4]*N[11] + D[2]*N[27]);//3,1
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[1] + D[3]*N[5] + D[2]*N[11] + D[5]*N[27]);//4,1
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[0]*N[2] + D[4]*N[6] + D[4]*N[17] + D[2]*N[28]);//5,1
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[2] + D[3]*N[6] + D[2]*N[17] + D[5]*N[28]);//6,1
-    entry++; kLocal[entry] = kLocal[entry]  + WeightPerDetJ*(D[0]*N[3] + D[4]*N[7] + D[4]*N[22] + D[2]*N[29]); //7,1
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[3] + D[3]*N[7] + D[2]*N[22] + D[5]*N[29]);//8,1
+             kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+0]*N[0] + 2*D[numberElement*6+4]*N[4] + D[numberElement*6+2]*N[26]); //1,1             
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[0] + D[numberElement*6+5]*N[26] + D[numberElement*6+3]*N[4] + D[numberElement*6+2]*N[4]); //2,1
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+0]*N[1] + D[numberElement*6+4]*N[5] + D[numberElement*6+4]*N[11] + D[numberElement*6+2]*N[27]);//3,1
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[1] + D[numberElement*6+3]*N[5] + D[numberElement*6+2]*N[11] + D[numberElement*6+5]*N[27]);//4,1
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+0]*N[2] + D[numberElement*6+4]*N[6] + D[numberElement*6+4]*N[17] + D[numberElement*6+2]*N[28]);//5,1
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[2] + D[numberElement*6+3]*N[6] + D[numberElement*6+2]*N[17] + D[numberElement*6+5]*N[28]);//6,1
+    entry++; kLocal[entry] = kLocal[entry]  + WeightPerDetJ*(D[numberElement*6+0]*N[3] + D[numberElement*6+4]*N[7] + D[numberElement*6+4]*N[22] + D[numberElement*6+2]*N[29]); //7,1
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[3] + D[numberElement*6+3]*N[7] + D[numberElement*6+2]*N[22] + D[numberElement*6+5]*N[29]);//8,1
     
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[0] + D[5]*N[26] + D[3]*N[4] + D[2]*N[4]); //2,1
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[2]*N[0] + 2*D[5]*N[4] + D[1]*N[26]);           //2,2
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[1] + D[3]*N[11] + D[2]*N[5] + D[5]*N[27]);//3,2
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[2]*N[1] + D[5]*N[5] + D[5]*N[11] + D[1]*N[27]);//4,2
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[2] + D[3]*N[17] + D[2]*N[6] + D[5]*N[28]);//5,2
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[2]*N[2] + D[5]*N[6] + D[5]*N[17] + D[1]*N[28]);//6,2
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[3] + D[3]*N[22] + D[2]*N[7] + D[5]*N[29]); //7,2
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[2]*N[3] + D[5]*N[7] + D[5]*N[22] + D[1]*N[29]);//8,2
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[0] + D[numberElement*6+5]*N[26] + D[numberElement*6+3]*N[4] + D[numberElement*6+2]*N[4]); //2,1
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+2]*N[0] + 2*D[numberElement*6+5]*N[4] + D[numberElement*6+1]*N[26]);           //2,2
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[1] + D[numberElement*6+3]*N[11] + D[numberElement*6+2]*N[5] + D[numberElement*6+5]*N[27]);//3,2
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+2]*N[1] + D[numberElement*6+5]*N[5] + D[numberElement*6+5]*N[11] + D[numberElement*6+1]*N[27]);//4,2
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[2] + D[numberElement*6+3]*N[17] + D[numberElement*6+2]*N[6] + D[numberElement*6+5]*N[28]);//5,2
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+2]*N[2] + D[numberElement*6+5]*N[6] + D[numberElement*6+5]*N[17] + D[numberElement*6+1]*N[28]);//6,2
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[3] + D[numberElement*6+3]*N[22] + D[numberElement*6+2]*N[7] + D[numberElement*6+5]*N[29]); //7,2
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+2]*N[3] + D[numberElement*6+5]*N[7] + D[numberElement*6+5]*N[22] + D[numberElement*6+1]*N[29]);//8,2
     
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[0]*N[1] + D[4]*N[5] + D[4]*N[11] + D[2]*N[27]);//3,1
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[1] + D[3]*N[11] + D[2]*N[5] + D[5]*N[27]);//3,2
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[0]*N[8] + 2*D[4]*N[12] + D[2]*N[30]);          //3,3
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[8] + D[5]*N[30] + D[3]*N[12] + D[2]*N[12]);//4,3
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[0]*N[9] + D[4]*N[13] + D[4]*N[18] + D[2]*N[31]);//5,3
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[9] + D[3]*N[13] + D[2]*N[18] + D[5]*N[31]);//6,3
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[0]*N[10] + D[4]*N[14] + D[4]*N[23] + D[2]*N[32]);//7,3
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[10] + D[3]*N[14] + D[2]*N[23] + D[5]*N[32]);//8,3
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+0]*N[1] + D[numberElement*6+4]*N[5] + D[numberElement*6+4]*N[11] + D[numberElement*6+2]*N[27]);//3,1
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[1] + D[numberElement*6+3]*N[11] + D[numberElement*6+2]*N[5] + D[numberElement*6+5]*N[27]);//3,2
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+0]*N[8] + 2*D[numberElement*6+4]*N[12] + D[numberElement*6+2]*N[30]);          //3,3
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[8] + D[numberElement*6+5]*N[30] + D[numberElement*6+3]*N[12] + D[numberElement*6+2]*N[12]);//4,3
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+0]*N[9] + D[numberElement*6+4]*N[13] + D[numberElement*6+4]*N[18] + D[numberElement*6+2]*N[31]);//5,3
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[9] + D[numberElement*6+3]*N[13] + D[numberElement*6+2]*N[18] + D[numberElement*6+5]*N[31]);//6,3
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+0]*N[10] + D[numberElement*6+4]*N[14] + D[numberElement*6+4]*N[23] + D[numberElement*6+2]*N[32]);//7,3
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[10] + D[numberElement*6+3]*N[14] + D[numberElement*6+2]*N[23] + D[numberElement*6+5]*N[32]);//8,3
     
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[1] + D[3]*N[5] + D[2]*N[11] + D[5]*N[27]);//4,1
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[2]*N[1] + D[5]*N[5] + D[5]*N[11] + D[1]*N[27]);//4,2
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[8] + D[5]*N[30] + D[3]*N[12] + D[2]*N[12]);//4,3
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[2]*N[8] + 2*D[5]*N[12] + D[1]*N[30]);           //4,4
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[9] + D[3]*N[18] + D[2]*N[13] + D[5]*N[31]);//5,4
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[2]*N[9] + D[5]*N[13] + D[5]*N[18] + D[1]*N[31]);//6,4
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[10] + D[3]*N[23] + D[2]*N[14] + D[5]*N[32]);//7,4
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[2]*N[10] + D[5]*N[14] + D[5]*N[23] + D[1]*N[32]);//8,4
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[1] + D[numberElement*6+3]*N[5] + D[numberElement*6+2]*N[11] + D[numberElement*6+5]*N[27]);//4,1
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+2]*N[1] + D[numberElement*6+5]*N[5] + D[numberElement*6+5]*N[11] + D[numberElement*6+1]*N[27]);//4,2
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[8] + D[numberElement*6+5]*N[30] + D[numberElement*6+3]*N[12] + D[numberElement*6+2]*N[12]);//4,3
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+2]*N[8] + 2*D[numberElement*6+5]*N[12] + D[numberElement*6+1]*N[30]);           //4,4
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[9] + D[numberElement*6+3]*N[18] + D[numberElement*6+2]*N[13] + D[numberElement*6+5]*N[31]);//5,4
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+2]*N[9] + D[numberElement*6+5]*N[13] + D[numberElement*6+5]*N[18] + D[numberElement*6+1]*N[31]);//6,4
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[10] + D[numberElement*6+3]*N[23] + D[numberElement*6+2]*N[14] + D[numberElement*6+5]*N[32]);//7,4
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+2]*N[10] + D[numberElement*6+5]*N[14] + D[numberElement*6+5]*N[23] + D[numberElement*6+1]*N[32]);//8,4
     
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[0]*N[2] + D[4]*N[6] + D[4]*N[17] + D[2]*N[28]);//5,1
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[2] + D[3]*N[17] + D[2]*N[6] + D[5]*N[28]);//5,2
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[0]*N[9] + D[4]*N[13] + D[4]*N[18] + D[2]*N[31]);//5,3
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[9] + D[3]*N[18] + D[2]*N[13] + D[5]*N[31]);//5,4
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[0]*N[15] + 2*D[4]*N[19] + D[2]*N[33]);//5,5
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[15] + D[5]*N[33] + D[3]*N[19] + D[2]*N[19]);//6,5
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[0]*N[16] + D[4]*N[20] + D[4]*N[24] + D[2]*N[34]);//7,5
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[16] + D[3]*N[20] + D[2]*N[24] + D[5]*N[34]);//8,5
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+0]*N[2] + D[numberElement*6+4]*N[6] + D[numberElement*6+4]*N[17] + D[numberElement*6+2]*N[28]);//5,1
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[2] + D[numberElement*6+3]*N[17] + D[numberElement*6+2]*N[6] + D[numberElement*6+5]*N[28]);//5,2
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+0]*N[9] + D[numberElement*6+4]*N[13] + D[numberElement*6+4]*N[18] + D[numberElement*6+2]*N[31]);//5,3
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[9] + D[numberElement*6+3]*N[18] + D[numberElement*6+2]*N[13] + D[numberElement*6+5]*N[31]);//5,4
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+0]*N[15] + 2*D[numberElement*6+4]*N[19] + D[numberElement*6+2]*N[33]);//5,5
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[15] + D[numberElement*6+5]*N[33] + D[numberElement*6+3]*N[19] + D[numberElement*6+2]*N[19]);//6,5
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+0]*N[16] + D[numberElement*6+4]*N[20] + D[numberElement*6+4]*N[24] + D[numberElement*6+2]*N[34]);//7,5
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[16] + D[numberElement*6+3]*N[20] + D[numberElement*6+2]*N[24] + D[numberElement*6+5]*N[34]);//8,5
     
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[2] + D[3]*N[6] + D[2]*N[17] + D[5]*N[28]);//6,1
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[2]*N[2] + D[5]*N[6] + D[5]*N[17] + D[1]*N[28]);//6,2
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[9] + D[3]*N[13] + D[2]*N[18] + D[5]*N[31]);//6,3
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[2]*N[9] + D[5]*N[13] + D[5]*N[18] + D[1]*N[31]);//6,4
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[15] + D[5]*N[33] + D[3]*N[19] + D[2]*N[19]);//6,5
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[2]*N[15] + 2*D[5]*N[19] + D[1]*N[33]);//6,6
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[16] + D[3]*N[24] + D[2]*N[20] + D[5]*N[34]);//7,6
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[2]*N[16] + D[5]*N[20] + D[5]*N[24] + D[1]*N[34]);//8,6
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[2] + D[numberElement*6+3]*N[6] + D[numberElement*6+2]*N[17] + D[numberElement*6+5]*N[28]);//6,1
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+2]*N[2] + D[numberElement*6+5]*N[6] + D[numberElement*6+5]*N[17] + D[numberElement*6+1]*N[28]);//6,2
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[9] + D[numberElement*6+3]*N[13] + D[numberElement*6+2]*N[18] + D[numberElement*6+5]*N[31]);//6,3
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+2]*N[9] + D[numberElement*6+5]*N[13] + D[numberElement*6+5]*N[18] + D[numberElement*6+1]*N[31]);//6,4
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[15] + D[numberElement*6+5]*N[33] + D[numberElement*6+3]*N[19] + D[numberElement*6+2]*N[19]);//6,5
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+2]*N[15] + 2*D[numberElement*6+5]*N[19] + D[numberElement*6+1]*N[33]);//6,6
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[16] + D[numberElement*6+3]*N[24] + D[numberElement*6+2]*N[20] + D[numberElement*6+5]*N[34]);//7,6
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+2]*N[16] + D[numberElement*6+5]*N[20] + D[numberElement*6+5]*N[24] + D[numberElement*6+1]*N[34]);//8,6
     
-    entry++; kLocal[entry] = kLocal[entry]  + WeightPerDetJ*(D[0]*N[3] + D[4]*N[7] + D[4]*N[22] + D[2]*N[29]); //7,1
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[3] + D[3]*N[22] + D[2]*N[7] + D[5]*N[29]); //7,2
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[0]*N[10] + D[4]*N[14] + D[4]*N[23] + D[2]*N[32]);//7,3
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[10] + D[3]*N[23] + D[2]*N[14] + D[5]*N[32]);//7,4
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[0]*N[16] + D[4]*N[20] + D[4]*N[24] + D[2]*N[34]);//7,5
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[16] + D[3]*N[24] + D[2]*N[20] + D[5]*N[34]);//7,6
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[0]*N[21] + 2*D[4]*N[25] + D[2]*N[35]);//7,7
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[21] + D[5]*N[35] + D[3]*N[25] + D[2]*N[25]);//8,7
+    entry++; kLocal[entry] = kLocal[entry]  + WeightPerDetJ*(D[numberElement*6+0]*N[3] + D[numberElement*6+4]*N[7] + D[numberElement*6+4]*N[22] + D[numberElement*6+2]*N[29]); //7,1
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[3] + D[numberElement*6+3]*N[22] + D[numberElement*6+2]*N[7] + D[numberElement*6+5]*N[29]); //7,2
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+0]*N[10] + D[numberElement*6+4]*N[14] + D[numberElement*6+4]*N[23] + D[numberElement*6+2]*N[32]);//7,3
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[10] + D[numberElement*6+3]*N[23] + D[numberElement*6+2]*N[14] + D[numberElement*6+5]*N[32]);//7,4
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+0]*N[16] + D[numberElement*6+4]*N[20] + D[numberElement*6+4]*N[24] + D[numberElement*6+2]*N[34]);//7,5
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[16] + D[numberElement*6+3]*N[24] + D[numberElement*6+2]*N[20] + D[numberElement*6+5]*N[34]);//7,6
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+0]*N[21] + 2*D[numberElement*6+4]*N[25] + D[numberElement*6+2]*N[35]);//7,7
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[21] + D[numberElement*6+5]*N[35] + D[numberElement*6+3]*N[25] + D[numberElement*6+2]*N[25]);//8,7
     
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[3] + D[3]*N[7] + D[2]*N[22] + D[5]*N[29]);//8,1
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[2]*N[3] + D[5]*N[7] + D[5]*N[22] + D[1]*N[29]);//8,2
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[10] + D[3]*N[14] + D[2]*N[23] + D[5]*N[32]);//8,3
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[2]*N[10] + D[5]*N[14] + D[5]*N[23] + D[1]*N[32]);//8,4
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[16] + D[3]*N[20] + D[2]*N[24] + D[5]*N[34]);//8,5
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[2]*N[16] + D[5]*N[20] + D[5]*N[24] + D[1]*N[34]);//8,6
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[4]*N[21] + D[5]*N[35] + D[3]*N[25] + D[2]*N[25]);//8,7
-    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[2]*N[21] + 2*D[5]*N[25] + D[1]*N[35]);//8,8
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[3] + D[numberElement*6+3]*N[7] + D[numberElement*6+2]*N[22] + D[numberElement*6+5]*N[29]);//8,1
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+2]*N[3] + D[numberElement*6+5]*N[7] + D[numberElement*6+5]*N[22] + D[numberElement*6+1]*N[29]);//8,2
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[10] + D[numberElement*6+3]*N[14] + D[numberElement*6+2]*N[23] + D[numberElement*6+5]*N[32]);//8,3
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+2]*N[10] + D[numberElement*6+5]*N[14] + D[numberElement*6+5]*N[23] + D[numberElement*6+1]*N[32]);//8,4
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[16] + D[numberElement*6+3]*N[20] + D[numberElement*6+2]*N[24] + D[numberElement*6+5]*N[34]);//8,5
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+2]*N[16] + D[numberElement*6+5]*N[20] + D[numberElement*6+5]*N[24] + D[numberElement*6+1]*N[34]);//8,6
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+4]*N[21] + D[numberElement*6+5]*N[35] + D[numberElement*6+3]*N[25] + D[numberElement*6+2]*N[25]);//8,7
+    entry++; kLocal[entry] = kLocal[entry] + WeightPerDetJ*(D[numberElement*6+2]*N[21] + 2*D[numberElement*6+5]*N[25] + D[numberElement*6+1]*N[35]);//8,8
     
   }
   unsigned int counter = 64*(numberElement);
@@ -146,7 +146,7 @@ void StiffnessMatrixFirstOrder::stiffnessMatrixCalculation(unsigned int numberEl
   }
 }
 
-StiffnessMatrixFirstOrder::StiffnessMatrixFirstOrder(Material& mat, Geometry& geo, unsigned int n)
+StiffnessMatrixFirstOrder::StiffnessMatrixFirstOrder(double* mat, Geometry& geo, unsigned int n)
   :StiffnessMatrix(mat,geo,n)
 {
   Log::Logger().Info("StiffnessMatrixFirstOrder Created by CPU");

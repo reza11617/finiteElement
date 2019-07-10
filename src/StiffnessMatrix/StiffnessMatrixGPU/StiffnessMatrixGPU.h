@@ -18,7 +18,7 @@ private:
   unsigned int blockSize;
   // methods
 public:
-  StiffnessMatrixGPU(Material&, Geometry&, unsigned int);
+  StiffnessMatrixGPU(double*, Geometry&, unsigned int);
   ~StiffnessMatrixGPU();
   Sparse& GetStiffnessMatrix() override;
 private:

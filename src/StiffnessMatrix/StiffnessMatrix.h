@@ -30,7 +30,7 @@ protected:
   unsigned int numberOfElements; //number of elements
   unsigned int nipSquared; // number of interation point squared
   double* integrationNode; unsigned int* integrationPos; double* integrationWeight;
-  Material* material;
+  double* material;
   Geometry* geometry;
   double* c;
   unsigned int sizeStiffMatPerEle;
@@ -41,7 +41,7 @@ protected:
 private:
   //METHODS
 public:
-  StiffnessMatrix(Material&, Geometry&, unsigned int);
+  StiffnessMatrix(double*, Geometry&, unsigned int);
   virtual ~StiffnessMatrix();
   virtual int GetStiffnessMatrixSize () = 0;
   virtual Sparse& GetStiffnessMatrix() = 0;

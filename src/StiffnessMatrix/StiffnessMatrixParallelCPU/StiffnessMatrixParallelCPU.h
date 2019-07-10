@@ -19,8 +19,8 @@ private:
   unsigned int threadNumber;
   //methods
 public:
-  StiffnessMatrixParallelCPU(Material&, Geometry&, unsigned int);
-  StiffnessMatrixParallelCPU(Material&, Geometry&, unsigned int, unsigned int); // takes number of the desired cores
+  StiffnessMatrixParallelCPU(double*, Geometry&, unsigned int);
+  StiffnessMatrixParallelCPU(double*, Geometry&, unsigned int, unsigned int); // takes number of the desired cores
   ~StiffnessMatrixParallelCPU();
   Sparse& GetStiffnessMatrix() override;
 private:  

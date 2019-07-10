@@ -2,6 +2,8 @@
 #define MATERIAL_H
 
 #include <iostream>
+#include <cuda.h>
+#include <cuda_runtime.h>
 #include "../Log/Log.h"
 
 class Material {

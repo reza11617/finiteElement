@@ -20,7 +20,7 @@ private:
   //METHODS
 public:
   StiffnessMatrixFirstOrder();
-  StiffnessMatrixFirstOrder(Material&, Geometry&, unsigned int);
+  StiffnessMatrixFirstOrder(double*, Geometry&, unsigned int);
   virtual ~StiffnessMatrixFirstOrder();
   virtual Sparse& GetStiffnessMatrix() = 0;
   int GetStiffnessMatrixSize() override;

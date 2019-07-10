@@ -5,11 +5,20 @@ int main() {
   // -- GEOMETRY (building the contiliver)
   Geometry p_cantilever = geometry();
   // -- Build material vector (E, nu)
-  Material mat(1000.0d, 0.3d);
+  double* d_matrix;
+  cudaMallocManaged(&d_matrix, p_cantilever.get_numberOfElementsG()*6*sizeof(double));
+  std::vector<Material> mat;
+  mat.reserve(p_cantilever.get_numberOfElementsG());
+  for(int iter = 0; iter < p_cantilever.get_numberOfElementsG(); iter++)
+  {
+    mat.emplace_back(1000.0, 0.3);
+    for (int j = 0; j<6;j++)
+      d_matrix[iter*6+j] = mat[iter].materialMatrix[j];
+  }
   // -- Building stiffness matrix on CPU single core, CPU multiple core & GPU.
   //StiffnessMatrixFirstOrder* stiffMat       = new StiffnessMatrixSingleCPU(mat,p_cantilever,4); 
   // StiffnessMatrixFirstOrder* stiffMatParCPU = new StiffnessMatrixParallelCPU(mat,p_cantilever,4,20);
-  StiffnessMatrixFirstOrder* stiffMatGPU    = new StiffnessMatrixGPU(mat,p_cantilever,4);
+  StiffnessMatrixFirstOrder* stiffMatGPU    = new StiffnessMatrixGPU(d_matrix,p_cantilever,4);
   //StiffnessMatrixFirstOrder* stiffMatGPU2    = new StiffnessMatrixGPU(mat,p_cantilever,4);
   // -- Calculate the stiffness matrix and do the assembly
   //Sparse &k = stiffMat->GetStiffnessMatrix();
@@ -65,11 +74,11 @@ int main() {
 }
 
 Geometry& geometry() {
-  // GEOMETRY (building the contiliver)
-  double dimentionX = 100.0; int numberOfElementX = 100; // dimention of x and number of element in x
-  double dimentionY =  10.0; int numberOfElementY = 10; 
-  double incr_x = dimentionX/numberOfElementX; // increment between each node 
-  double incr_y = dimentionY/numberOfElementY;
+  // GEOMETRY (building the cantilever)
+  double dimensionX = 100.0; int numberOfElementX = 80; // dimension of x and number of element in x
+  double dimensionY =  10.0; int numberOfElementY = 8; 
+  double incr_x = dimensionX/numberOfElementX; // increment between each node 
+  double incr_y = dimensionY/numberOfElementY;
   Geometry* cantilever = new Geometry();
   /*
   6 --- 7 --- 8
@@ -85,7 +94,7 @@ Geometry& geometry() {
 
   for (unsigned int j = 0; j <= numberOfElementY; j++)
     cantilever->dof->fix(j*(numberOfElementX+1),1,1);
-  cantilever->load->point((numberOfElementX+1)*(numberOfElementY+1),0.0d,-0.1d); // pointLoad(NodeNumber,DOF(1 for x 2 for y), value(N))
+  cantilever->load->point((numberOfElementX+1)*(numberOfElementY+1),0.0,-0.1); // pointLoad(NodeNumber,DOF(1 for x 2 for y), value(N))
   // Mesh the Cantilever beam
     /*
     6 --- 7 --- 8

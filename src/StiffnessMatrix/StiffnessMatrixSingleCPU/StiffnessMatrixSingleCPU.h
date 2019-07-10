@@ -19,7 +19,7 @@ private:
   unsigned int threadNumber;
   //methods
 public:
-  StiffnessMatrixSingleCPU(Material&, Geometry&, unsigned int);
+  StiffnessMatrixSingleCPU(double*, Geometry&, unsigned int);
   ~StiffnessMatrixSingleCPU();
   Sparse& GetStiffnessMatrix() override;
 private:  

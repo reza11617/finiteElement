@@ -10,14 +10,14 @@ inline void gpuAssert(cudaError_t code, char *file, int line, bool abort=true)
    }
 }
 
-StiffnessMatrixGPU::StiffnessMatrixGPU(Material& mat, Geometry &geo, unsigned int n)
+StiffnessMatrixGPU::StiffnessMatrixGPU(double* mat, Geometry &geo, unsigned int n)
   : StiffnessMatrixFirstOrder(mat, geo, n)
 {
   int device = -1;
   cudaGetDevice(&device);
   // copy from the material matarix
-  cudaMallocManaged(&D_d, 6*sizeof(double));
-  cudaMemcpy(D_d, material->materialMatrix, 6*sizeof(double), cudaMemcpyHostToDevice);
+  //cudaMallocManaged(&D_d, 6*sizeof(double));
+  //cudaMemcpy(D_d, material->materialMatrix, 6*sizeof(double), cudaMemcpyHostToDevice);
   cudaDeviceSynchronize();
   Log::Logger().Info("StiffnessMatrixGPU created by CPU");
 };
@@ -25,7 +25,7 @@ StiffnessMatrixGPU::StiffnessMatrixGPU(Material& mat, Geometry &geo, unsigned in
 StiffnessMatrixGPU::~StiffnessMatrixGPU()
 {
   Log::Logger().Info("StiffnessMatrixGPU deleted by CPU");
-  cudaFree(D_d);
+  //cudaFree(D_d);
 }
 
 __global__ void constantCreatorKernel(int n, double* c, double* x, double* y, unsigned int* mesh, StiffnessMatrixGPU *s)
@@ -60,7 +60,7 @@ Sparse& StiffnessMatrixGPU::GetStiffnessMatrix()
   cudaDeviceSynchronize();
   numBlocks = (simulationSize + blockSize-1)/blockSize;
   Timer timer("Time spend in GPU: ");
-  StiffnessMatrixKernel<<<numBlocks, blockSize>>>(numberOfElements, nipSquared, integrationNode, integrationPos, integrationWeight, c, D_d, geometry->get_mesh(), stiffMat->value, stiffMat->i, stiffMat->j , geometry->get_Dof().get_free(), geometry->get_thickness(),this);
+  StiffnessMatrixKernel<<<numBlocks, blockSize>>>(numberOfElements, nipSquared, integrationNode, integrationPos, integrationWeight, c, material, geometry->get_mesh(), stiffMat->value, stiffMat->i, stiffMat->j , geometry->get_Dof().get_free(), geometry->get_thickness(),this);
   gpuErrchk( cudaPeekAtLastError() );
   gpuErrchk( cudaDeviceSynchronize() );
   cudaDeviceSynchronize();

@@ -1,11 +1,11 @@
 #include "StiffnessMatrixParallelCPU.h"
 
-StiffnessMatrixParallelCPU::StiffnessMatrixParallelCPU(Material& mat, Geometry &geo, unsigned int n)
+StiffnessMatrixParallelCPU::StiffnessMatrixParallelCPU(double* mat, Geometry &geo, unsigned int n)
   : StiffnessMatrixParallelCPU(mat, geo, n,(std::thread::hardware_concurrency()-1))
 { 
 };
 
-StiffnessMatrixParallelCPU::StiffnessMatrixParallelCPU(Material& mat, Geometry &geo, unsigned int n, unsigned int numberOfCores)
+StiffnessMatrixParallelCPU::StiffnessMatrixParallelCPU(double* mat, Geometry &geo, unsigned int n, unsigned int numberOfCores)
   : StiffnessMatrixFirstOrder(mat, geo, n), concurentThreadsSupported(numberOfCores)
 {
   Log::Logger().Info("StiffnessMatrixParallelCPU created with " + std::to_string(concurentThreadsSupported) + " threads");
@@ -49,5 +49,5 @@ void StiffnessMatrixParallelCPU::GetStiffnessMatrixForEachThread(unsigned int th
 {
   unsigned int counter = threadId*(simulationSize/concurentThreadsSupported);
   for (unsigned int i = 0; i<simulationPerThread[threadId]; i++)
-    stiffnessMatrixCalculation(counter+i, nipSquared,integrationNode, integrationPos, integrationWeight, c, material->materialMatrix, geometry->get_mesh(), stiffMat->value, stiffMat->i, stiffMat->j, geometry->get_Dof().get_free(), geometry->get_thickness());
+    stiffnessMatrixCalculation(counter+i, nipSquared,integrationNode, integrationPos, integrationWeight, c, material, geometry->get_mesh(), stiffMat->value, stiffMat->i, stiffMat->j, geometry->get_Dof().get_free(), geometry->get_thickness());
 }

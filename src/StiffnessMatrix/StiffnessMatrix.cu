@@ -1,7 +1,7 @@
 #include "StiffnessMatrix.h"
 
-StiffnessMatrix::StiffnessMatrix(Material& mat, Geometry& geo, unsigned int n)
-  : material(&mat), geometry(&geo), numberOfIntegrationPoint(n)
+StiffnessMatrix::StiffnessMatrix(double* mat, Geometry& geo, unsigned int n)
+  : material(mat), geometry(&geo), numberOfIntegrationPoint(n)
 {
   numberOfElements = geometry->get_numberOfElementsG();
   nipSquared = numberOfIntegrationPoint*numberOfIntegrationPoint;

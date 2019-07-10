@@ -7,14 +7,14 @@ Material::Material(double E, double nu)
 };
 Material::~Material()
 {
-  Log::Logger().Info("Material deleted");
-  delete[] materialMatrix;
+  //Log::Logger().Info("Material deleted");
+  cudaFree(materialMatrix);
 };
 void Material::elasticMaterial()
 {
   // this function will create a vector for material matrix
   // D11 D22 D33 D12 D13 D23
-  materialMatrix = new double[6];
+  cudaMallocManaged(&materialMatrix, 6*sizeof(double));
   double E1 = ElasticModulus*(1-poissonRatio)/((1-poissonRatio*2)*(1+poissonRatio));
   double E2 = poissonRatio*E1/(1-poissonRatio);
   double G  = ElasticModulus/(2*(1+poissonRatio));
